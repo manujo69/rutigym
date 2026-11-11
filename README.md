@@ -83,22 +83,30 @@ tirones de espalda (jalón al pecho y remo sentado).
 
 ### Persistencia
 
-El MVP no usa backend. El plan semanal y el registro de series se guardan en `localStorage`:
+El MVP no usa backend: los datos viven en **SQLite** (`@capacitor-community/sqlite`), en la base
+`rutigym`. El esquema (`src/app/core/data/sqlite.service.ts`) es relacional, una tabla por concepto:
 
-- `rutigym.plan.v2` → días configurados y la rutina de cada día (`routines[day]`, en orden de alta).
-- `rutigym.logs.v2` → series registradas por día y ejercicio; la longitud puede superar las series
-  configuradas cuando se añaden series extra en la sesión.
-- `rutigym.last-values.v1` → últimos reps/kg usados por ejercicio, para precargar la próxima sesión.
-- `rutigym.sessions.v1` → sesiones terminadas (fecha, día del plan y snapshot de ejercicios con kg/reps).
-- `rutigym.demo-seeded.v1` → marca de que la semana de ejemplo ya se sembró (o se descartó).
+| Tabla | Contenido |
+| --- | --- |
+| `plan_day` | días configurados, con su posición |
+| `routine_item` | ejercicios de cada rutina, con series y orden |
+| `set_log` | registro activo de series por día y ejercicio (`reps`, `kg`, `done`) |
+| `last_value` | últimos reps/kg por ejercicio, para precargar la próxima sesión |
+| `workout_session` / `session_set` | sesiones terminadas y el snapshot de sus series |
+| `app_meta` | marcas internas (`legacy_migrated`, `demo_seeded`) |
 
-Los valores de una serie no se escriben a mano: arrancan con `10` reps y `20` kg si el ejercicio nunca
-se registró, o con los últimos valores usados de ese ejercicio, y se ajustan con los botones `‹ ›`.
-La clave del plan es `v2` y la de logs es `v2`: un plan o un log del modelo anterior (`v1`) no se lee,
-tal como corresponde a este MVP sin usuarios reales.
-
-La integración de `@capacitor-community/sqlite` queda para una siguiente iteración; el acceso al
-almacenamiento está aislado en `RoutineStore` para poder sustituirlo sin tocar las pantallas.
+- En el navegador el plugin se apoya en `jeep-sqlite` + `sql.js`; el wasm se sirve desde
+  `/assets/sql-wasm.wasm` (versión `1.11.0`, la que embebe `jeep-sqlite`) y la base queda en
+  IndexedDB (`jeepSqliteStore`). Cada escritura se vuelca con `saveToStore()` para que sobreviva a un
+  reload; en Android el plugin nativo ya es durable.
+- Los valores de una serie no se escriben a mano: arrancan con `10` reps y `20` kg si el ejercicio
+  nunca se registró, o con los últimos valores usados, y se ajustan con los botones `‹ ›`.
+- **Migración**: en el primer arranque con la base vacía se importan las claves `rutigym.*` del
+  modelo anterior y se marca `legacy_migrated`. `localStorage` no se vuelve a escribir ni a leer
+  (las claves viejas quedan inertes).
+- `RoutineStore` conserva su API de signals; la hidratación ocurre una vez, antes del primer render,
+  vía `provideAppInitializer`. El acceso a datos está detrás de `RoutineRepository`, con una
+  implementación en memoria para los tests.
 
 ## Estructura del proyecto
 ```
