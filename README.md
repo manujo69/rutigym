@@ -61,12 +61,14 @@ tirones de espalda (jalón al pecho y remo sentado).
 - Si el ejercicio no tiene `image`, la tarjeta **no se renderiza** (sin huecos ni imágenes roscas).
 - Hoy usan imagen: `core-contractora`, `core-press-pecho`, `core-press-banca`,
   `brazos-press-hombros`, `brazos-deltoides-posterior`, `brazos-jalon-triceps`,
-  `espalda-jalon-pecho`, `espalda-remo-sentado`, `espalda-multiestacion`, `piernas-extension`,
-  `piernas-abduccion`, `piernas-cadera` y `brazos-curl-barra`: los trece renders disponibles.
+  `espalda-jalon-pecho`, `espalda-remo-sentado`, `piernas-extension`, `piernas-abduccion`,
+  `piernas-cadera` y `brazos-curl-barra`: los doce renders en uso.
 - Los assets se generan con `scripts/prepare-exercise-images.py <origen> <destino>`, que recorta el
   render, limpia el fondo de estudio y exporta el WebP de 720 px sobre blanco.
-- El catálogo tiene 31 ejercicios; 13 tienen render y el resto se muestran sin imagen (la tarjeta
+- El catálogo tiene 30 ejercicios; 12 tienen render y el resto se muestran sin imagen (la tarjeta
   simplemente no aparece).
+- La multiestación (`multi-gym.webp`) queda como asset sin usar: es una **máquina**, no un ejercicio,
+  así que no está en el catálogo.
 
 ### Progreso
 - **Terminar día** toma las series completadas de ese día, las guarda como una **sesión con fecha**
