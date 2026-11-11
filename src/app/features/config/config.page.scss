@@ -1,0 +1,87 @@
+.config__days {
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--blue-800);
+}
+
+.config__days--empty {
+  color: var(--muted);
+}
+
+.config__confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: #fff6f7;
+}
+
+.config__confirm-text {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--danger);
+}
+
+.config__confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.config__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.config__group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--blue-50);
+}
+
+.config__group-name {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--blue-700);
+}
+
+.config__group-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.config__note {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px dashed var(--blue-200);
+}
+
+.config__note-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.config__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}

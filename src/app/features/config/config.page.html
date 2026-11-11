@@ -1,0 +1,70 @@
+<section class="page">
+  <header class="topbar">
+    <a class="icon-button" routerLink="/" aria-label="Volver al inicio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </a>
+    <h1 class="topbar__title">Configuración</h1>
+  </header>
+
+  <div class="card">
+    <span class="eyebrow">Días de entrenamiento</span>
+
+    @if (store.hasPlan()) {
+      <p class="config__days">{{ store.daysLabel() }}</p>
+      <p class="muted">
+        {{ store.days().length }} días · {{ store.plannedExercises().length }} ejercicios ·
+        {{ store.totalSeries() }} series por sesión
+      </p>
+
+      @if (confirmingDelete()) {
+        <div class="config__confirm">
+          <p class="config__confirm-text">¿Borrar la rutina configurada?</p>
+          <div class="config__confirm-actions">
+            <button type="button" class="btn btn--danger btn--sm" (click)="clearPlan()">Borrar</button>
+            <button
+              type="button"
+              class="btn btn--ghost btn--sm"
+              (click)="confirmingDelete.set(false)"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      } @else {
+        <button type="button" class="btn btn--danger" (click)="confirmingDelete.set(true)">
+          Borrar
+        </button>
+      }
+    } @else {
+      <p class="config__days config__days--empty">Sin configurar</p>
+      <p class="muted">Elige cuántos días entrenas y las series de cada ejercicio.</p>
+      <a class="btn btn--primary" routerLink="/configurar/dias">Empezar</a>
+    }
+  </div>
+
+  @if (store.hasPlan()) {
+    <div class="card card--soft">
+      <span class="eyebrow">Ejercicios por grupo</span>
+      <div class="config__groups">
+        @for (section of sections(); track section.group) {
+          <div class="config__group">
+            <span class="config__group-name">{{ section.group }}</span>
+            <span class="config__group-count">{{ section.count }} ejercicios</span>
+          </div>
+        }
+      </div>
+      <a class="btn btn--outline" routerLink="/configurar/ejercicios">Editar ejercicios</a>
+    </div>
+  } @else {
+    <div class="config__note">
+      <p class="config__note-title">Cómo funciona</p>
+      <ol class="config__steps">
+        <li>Elige cuántos días quieres entrenar.</li>
+        <li>Marca los días de la semana.</li>
+        <li>Ajusta las series de cada ejercicio.</li>
+      </ol>
+    </div>
+  }
+</section>

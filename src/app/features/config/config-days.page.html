@@ -1,0 +1,79 @@
+<section class="page">
+  <header class="topbar">
+    <a class="icon-button" routerLink="/configurar" aria-label="Volver a configuración">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </a>
+    <h1 class="topbar__title">Días de entrenamiento</h1>
+  </header>
+
+  <div class="setup__head">
+    <h2 class="section-title">¿Cuántos días quieres entrenar?</h2>
+    <p class="muted">Elige la cantidad y marca los días de la semana.</p>
+  </div>
+
+  <div class="card stepper-card">
+    <button
+      type="button"
+      class="stepper__btn stepper__btn--big"
+      [disabled]="count() <= 1"
+      (click)="setCount(count() - 1)"
+      aria-label="Un día menos"
+    >
+      −
+    </button>
+    <div class="stepper__value">
+      <strong>{{ count() }}</strong>
+      <span>días / semana</span>
+    </div>
+    <button
+      type="button"
+      class="stepper__btn stepper__btn--big"
+      [disabled]="count() >= 7"
+      (click)="setCount(count() + 1)"
+      aria-label="Un día más"
+    >
+      +
+    </button>
+  </div>
+
+  <div class="card">
+    <span class="eyebrow">Tus días</span>
+    <div class="day-grid">
+      @for (day of days; track day) {
+        <button
+          type="button"
+          class="day-grid__item"
+          [class.day-grid__item--on]="isSelected(day)"
+          [attr.aria-pressed]="isSelected(day)"
+          [attr.aria-label]="labels[day].long"
+          (click)="toggle(day)"
+        >
+          {{ labels[day].letter }}
+        </button>
+      }
+    </div>
+
+    @if (ready()) {
+      <p class="setup__hint setup__hint--ok">{{ selectedLabel() }}</p>
+    } @else {
+      <p class="setup__hint">Te {{ remaining() === 1 ? 'falta' : 'faltan' }} {{ remaining() }} día(s) por marcar.</p>
+    }
+  </div>
+
+  <div class="card setup__preview">
+    <span class="eyebrow">Resumen</span>
+    <p class="setup__preview-days">{{ selectedLabel() || 'Sin días marcados' }}</p>
+    <p class="muted">
+      {{ count() }} {{ count() === 1 ? 'sesión' : 'sesiones' }} por semana · series ajustables en el
+      siguiente paso
+    </p>
+  </div>
+
+  <div class="sticky-actions">
+    <button type="button" class="btn btn--primary" [disabled]="!ready()" (click)="continueSetup()">
+      Continuar
+    </button>
+  </div>
+</section>

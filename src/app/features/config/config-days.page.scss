@@ -1,0 +1,62 @@
+.setup__head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stepper-card {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+}
+
+.stepper__value {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stepper__value strong {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--blue-700);
+}
+
+.stepper__value span {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.setup__hint {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.setup__hint--ok {
+  color: var(--blue-600);
+  font-weight: 800;
+}
+
+.setup__preview {
+  margin-top: auto;
+}
+
+.setup__preview-days {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: var(--blue-800);
+}
+
+.sticky-actions {
+  margin-top: 0;
+}

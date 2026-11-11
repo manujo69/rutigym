@@ -1,0 +1,66 @@
+<section class="page">
+  <header class="topbar">
+    <a class="icon-button" routerLink="/configurar/dias" aria-label="Volver a los días">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </a>
+    <h1 class="topbar__title">Ejercicios</h1>
+  </header>
+
+  @if (!canSave) {
+    <div class="empty-state">
+      <p class="empty-state__title">Elige primero tus días</p>
+      <p class="muted">Necesitas al menos un día de entrenamiento para guardar la rutina.</p>
+      <a class="btn btn--primary btn--sm" routerLink="/configurar/dias">Elegir días</a>
+    </div>
+  } @else {
+    <div class="exercises__head">
+      <h2 class="section-title">Series por ejercicio</h2>
+      <p class="exercises__days">{{ daysLabel }}</p>
+      <p class="muted">{{ totalSeries() }} series por sesión en total.</p>
+    </div>
+
+    @for (section of groups; track section.group) {
+      <section class="exercises__group">
+        <p class="group-heading">
+          {{ section.group }}
+          <span class="group-heading__count">{{ section.exercises.length }}</span>
+        </p>
+
+        <div class="list">
+          @for (exercise of section.exercises; track exercise.id) {
+            <div class="exercise">
+              <span class="exercise__name">{{ exercise.name }}</span>
+              <div class="stepper">
+                <button
+                  type="button"
+                  class="stepper__btn"
+                  [disabled]="seriesFor(exercise.id) <= 1"
+                  (click)="adjust(exercise.id, -1)"
+                  [attr.aria-label]="'Quitar una serie a ' + exercise.name"
+                >
+                  −
+                </button>
+                <span class="stepper__count">{{ seriesFor(exercise.id) }}</span>
+                <button
+                  type="button"
+                  class="stepper__btn"
+                  [disabled]="seriesFor(exercise.id) >= 10"
+                  (click)="adjust(exercise.id, 1)"
+                  [attr.aria-label]="'Añadir una serie a ' + exercise.name"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <div class="sticky-actions">
+      <button type="button" class="btn btn--primary" (click)="save()">Guardar rutina</button>
+    </div>
+  }
+</section>
