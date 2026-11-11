@@ -22,5 +22,21 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/config/config-exercises.page').then((m) => m.ConfigExercisesPage),
   },
+  {
+    path: 'entrenar',
+    title: 'Entrenar · Rutigym',
+    loadComponent: () => import('./features/train/train.page').then((m) => m.TrainPage),
+  },
+  {
+    path: 'entrenar/:day',
+    title: 'Rutina del día · Rutigym',
+    loadComponent: () => import('./features/train/train-day.page').then((m) => m.TrainDayPage),
+  },
+  {
+    path: 'entrenar/:day/:exerciseId',
+    title: 'Registro de series · Rutigym',
+    loadComponent: () =>
+      import('./features/train/exercise-log.page').then((m) => m.ExerciseLogPage),
+  },
   { path: '**', redirectTo: '' },
 ];

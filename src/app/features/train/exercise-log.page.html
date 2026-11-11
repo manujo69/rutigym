@@ -1,0 +1,94 @@
+<section class="page">
+  <header class="topbar">
+    <a class="icon-button" [routerLink]="['/entrenar', day()]" aria-label="Volver al listado de ejercicios">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </a>
+    <div class="topbar__body">
+      <span class="eyebrow">{{ exercise()?.group ?? 'Ejercicio' }}</span>
+      <h1 class="topbar__title">{{ exercise()?.name ?? 'Ejercicio' }}</h1>
+    </div>
+  </header>
+
+  @if (!dayKey() || !exercise()) {
+    <div class="empty-state">
+      <p class="empty-state__title">Ejercicio no válido</p>
+      <p class="muted">El ejercicio no pertenece a tu rutina configurada.</p>
+      <a class="btn btn--primary btn--sm" routerLink="/entrenar">Volver a entrenar</a>
+    </div>
+  } @else {
+    <div class="card">
+      <div class="log__summary">
+        <div>
+          <span class="eyebrow">Series completadas</span>
+          <p class="log__count">{{ doneCount() }} / {{ entries().length }}</p>
+        </div>
+        <span class="badge" [class.badge--done]="doneCount() === entries().length && entries().length > 0">
+          {{ percent() }}%
+        </span>
+      </div>
+      <span class="bar">
+        <span class="bar__fill" [style.width.%]="percent()"></span>
+      </span>
+    </div>
+
+    <p class="log__hint">Anota repeticiones y kilos por serie, y marca cada serie al terminarla.</p>
+
+    <div class="list">
+      @for (entry of entries(); track $index; let i = $index) {
+        <div class="set" [class.set--done]="entry.done">
+          <div class="set__head">
+            <button
+              type="button"
+              class="set__check"
+              [attr.aria-pressed]="entry.done"
+              [attr.aria-label]="'Marcar serie ' + (i + 1)"
+              (click)="toggleDone(i)"
+            >
+              @if (entry.done) {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+              }
+            </button>
+            <span class="set__label">Serie {{ i + 1 }}</span>
+            <span class="set__state">{{ entry.done ? 'Hecha' : 'Pendiente' }}</span>
+          </div>
+
+          <div class="set__fields">
+            <label class="set__field">
+              <span class="field__label">Reps</span>
+              <input
+                class="field__input"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                placeholder="—"
+                [value]="entry.reps ?? ''"
+                (input)="setReps(i, $event)"
+              />
+            </label>
+            <label class="set__field">
+              <span class="field__label">Kg</span>
+              <input
+                class="field__input"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                step="0.5"
+                placeholder="—"
+                [value]="entry.kg ?? ''"
+                (input)="setKg(i, $event)"
+              />
+            </label>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="sticky-actions">
+      <button type="button" class="btn btn--primary" (click)="save()">Guardar series</button>
+    </div>
+  }
+</section>

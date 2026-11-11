@@ -1,0 +1,68 @@
+<section class="page">
+  <header class="topbar">
+    <a class="icon-button" routerLink="/entrenar" aria-label="Volver a los días">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </a>
+    <div class="topbar__body">
+      <span class="eyebrow">Rutina del día</span>
+      <h1 class="topbar__title">{{ dayLabel() || 'Día' }}</h1>
+    </div>
+  </header>
+
+  @if (!dayKey()) {
+    <div class="empty-state">
+      <p class="empty-state__title">Día no válido</p>
+      <p class="muted">Ese día no forma parte de tu plan semanal.</p>
+      <a class="btn btn--primary btn--sm" routerLink="/entrenar">Elegir otro día</a>
+    </div>
+  } @else {
+    <div class="card card--dark day-progress">
+      <div class="day-progress__top">
+        <div class="day-progress__ring">
+          <span>{{ percent() }}%</span>
+        </div>
+        <div class="day-progress__text">
+          <span class="eyebrow day-progress__eyebrow">Series completadas</span>
+          <p class="day-progress__count">{{ progress().done }} / {{ progress().total }}</p>
+          <p class="day-progress__hint">
+            {{ sections().length }} grupos · {{ store.plannedExercises().length }} ejercicios
+          </p>
+        </div>
+      </div>
+      <span class="bar bar--dark">
+        <span class="bar__fill" [style.width.%]="percent()"></span>
+      </span>
+    </div>
+
+    @for (section of sections(); track section.group) {
+      <section class="train-day__group">
+        <p class="group-heading">
+          {{ section.group }}
+          <span class="group-heading__count">{{ section.exercises.length }}</span>
+        </p>
+        <div class="list">
+          @for (exercise of section.exercises; track exercise.id) {
+            <button type="button" class="list-row" (click)="open(exercise.id)">
+              <span class="list-row__body">
+                <span class="list-row__title">{{ exercise.name }}</span>
+                <span class="list-row__meta">
+                  {{ exercise.total }} series · {{ exercise.done }} registradas
+                </span>
+              </span>
+              <span class="badge" [class.badge--done]="exercise.done === exercise.total">
+                {{ exercise.done }}/{{ exercise.total }}
+              </span>
+              <span class="chevron" aria-hidden="true">›</span>
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    <div class="sticky-actions">
+      <a class="btn btn--primary" routerLink="/entrenar">Terminar día</a>
+    </div>
+  }
+</section>

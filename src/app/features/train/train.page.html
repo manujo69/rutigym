@@ -1,0 +1,53 @@
+<section class="page">
+  <header class="topbar">
+    <a class="icon-button" routerLink="/" aria-label="Volver al inicio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </a>
+    <h1 class="topbar__title">Entrenar</h1>
+  </header>
+
+  @if (store.hasPlan()) {
+    <div class="train__head">
+      <h2 class="section-title">Elige tu día</h2>
+      <p class="muted">Tu plan: {{ store.daysLabel() }}</p>
+    </div>
+
+    <div class="list">
+      @for (selection of selections(); track selection.day) {
+        <button
+          type="button"
+          class="day-row"
+          [class.day-row--on]="selected() === selection.day"
+          [attr.aria-pressed]="selected() === selection.day"
+          (click)="pick(selection.day)"
+        >
+          <span class="day-row__letter">{{ labels[selection.day].letter }}</span>
+          <span class="day-row__body">
+            <span class="day-row__name">{{ selection.label }}</span>
+            <span class="day-row__meta">
+              {{ selection.totalSeries }} series · {{ selection.doneSeries }} registradas
+            </span>
+          </span>
+          @if (today === selection.day) {
+            <span class="badge badge--today">Hoy</span>
+          }
+          <span class="day-row__radio" aria-hidden="true"></span>
+        </button>
+      }
+    </div>
+
+    <div class="sticky-actions">
+      <button type="button" class="btn btn--primary" [disabled]="!selected()" (click)="start()">
+        Empezar
+      </button>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <p class="empty-state__title">Todavía no hay rutina</p>
+      <p class="muted">Configura tus días de entrenamiento y las series de cada ejercicio.</p>
+      <a class="btn btn--primary btn--sm" routerLink="/configurar/dias">Configurar rutina</a>
+    </div>
+  }
+</section>

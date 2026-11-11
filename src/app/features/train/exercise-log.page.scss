@@ -1,0 +1,124 @@
+.topbar__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.topbar__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.log__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.log__count {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: var(--blue-800);
+}
+
+.log__hint {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.set {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.set--done {
+  border-color: rgba(18, 184, 200, 0.45);
+  background: linear-gradient(180deg, #f2fdfd, #ffffff 70%);
+}
+
+.set__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.set__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border: 2px solid var(--blue-200);
+  border-radius: 9px;
+  background: #fff;
+  color: #fff;
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.set__check:active {
+  transform: scale(0.9);
+}
+
+.set__check svg {
+  width: 16px;
+  height: 16px;
+}
+
+.set--done .set__check {
+  border-color: var(--teal);
+  background: var(--teal);
+}
+
+.set__label {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.set__state {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.set--done .set__state {
+  color: #0b8f8f;
+}
+
+.set__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.set__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.set__field .field__label {
+  padding-left: 2px;
+}

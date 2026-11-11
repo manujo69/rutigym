@@ -1,0 +1,62 @@
+.topbar__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.day-progress {
+  gap: 16px;
+}
+
+.day-progress__top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.day-progress__ring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 66px;
+  height: 66px;
+  flex: 0 0 auto;
+  border: 4px solid rgba(147, 169, 255, 0.35);
+  border-top-color: var(--teal);
+  border-radius: 50%;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.day-progress__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.day-progress__eyebrow {
+  color: rgba(195, 208, 255, 0.7);
+}
+
+.day-progress__count {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.day-progress__hint {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(195, 208, 255, 0.72);
+}
+
+.bar--dark {
+  background: rgba(147, 169, 255, 0.25);
+}
+
+.train-day__group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
