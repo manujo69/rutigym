@@ -62,7 +62,7 @@ tirones de espalda (jalón al pecho y remo sentado).
 - Hoy usan imagen: `core-contractora`, `core-press-pecho`, `core-press-banca`,
   `brazos-press-hombros`, `brazos-deltoides-posterior`, `brazos-jalon-triceps`,
   `espalda-jalon-pecho`, `espalda-remo-sentado`, `espalda-multiestacion`, `piernas-extension`,
-  `piernas-abduccion` y `brazos-curl-barra`: los doce renders disponibles.
+  `piernas-abduccion`, `piernas-cadera` y `brazos-curl-barra`: los trece renders disponibles.
 - Los assets se generan con `scripts/prepare-exercise-images.py <origen> <destino>`, que recorta el
   render, limpia el fondo de estudio y exporta el WebP de 720 px sobre blanco.
 
