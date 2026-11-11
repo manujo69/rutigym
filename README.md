@@ -59,10 +59,10 @@ tirones de espalda (jalón al pecho y remo sentado).
 - La pantalla de registro (`/entrenar/:day/:exerciseId`) muestra la imagen en una tarjeta blanca
   entre la barra de progreso y la lista de series.
 - Si el ejercicio no tiene `image`, la tarjeta **no se renderiza** (sin huecos ni imágenes roscas).
-- Hoy usan imagen: `core-contractora`, `core-press-pecho`, `brazos-press-hombros`,
-  `brazos-deltoides-posterior`, `brazos-jalon-triceps`, `espalda-jalon-pecho`,
-  `espalda-remo-sentado`, `espalda-multiestacion`, `piernas-extension`, `piernas-abduccion` y
-  `brazos-curl-barra`: los once renders disponibles.
+- Hoy usan imagen: `core-contractora`, `core-press-pecho`, `core-press-banca`,
+  `brazos-press-hombros`, `brazos-deltoides-posterior`, `brazos-jalon-triceps`,
+  `espalda-jalon-pecho`, `espalda-remo-sentado`, `espalda-multiestacion`, `piernas-extension`,
+  `piernas-abduccion` y `brazos-curl-barra`: los doce renders disponibles.
 - Los assets se generan con `scripts/prepare-exercise-images.py <origen> <destino>`, que recorta el
   render, limpia el fondo de estudio y exporta el WebP de 720 px sobre blanco.
 
