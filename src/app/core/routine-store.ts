@@ -1,12 +1,12 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { GROUP_ORDER, exerciseById } from './exercise-catalog';
 import {
-  DAY_LABELS,
-  DAY_ORDER,
   DEFAULT_KG,
   DEFAULT_REPS,
   DEFAULT_SERIES,
+  DAY_LABELS,
+  DAY_ORDER,
   DayKey,
   Exercise,
   ExerciseGroup,
@@ -14,8 +14,8 @@ import {
   MAX_SERIES,
   PlannedExercise,
   SessionExercise,
-  SetEntry,
   SessionLogs,
+  SetEntry,
   TrainingPlan,
   WeekDay,
   WorkoutSession,
@@ -27,19 +27,31 @@ import {
   formatDays,
   sortDays,
   startOfWeek,
-  todayKey,
   toIsoDate,
+  todayKey,
 } from './models';
+import { ROUTINE_REPOSITORY, RoutineMap, RoutineSnapshot } from './data/routine.repository';
 
-const PLAN_STORAGE_KEY = 'rutigym.plan.v2';
-const LOGS_STORAGE_KEY = 'rutigym.logs.v2';
-const LAST_VALUES_STORAGE_KEY = 'rutigym.last-values.v1';
-const SESSIONS_STORAGE_KEY = 'rutigym.sessions.v1';
-const DEMO_SEEDED_STORAGE_KEY = 'rutigym.demo-seeded.v1';
+const LEGACY_PLAN_KEY = 'rutigym.plan.v2';
+const LEGACY_LOGS_KEY = 'rutigym.logs.v2';
+const LEGACY_LAST_VALUES_KEY = 'rutigym.last-values.v1';
+const LEGACY_SESSIONS_KEY = 'rutigym.sessions.v1';
+const LEGACY_DEMO_KEY = 'rutigym.demo-seeded.v1';
+const LEGACY_MIGRATED_META = 'legacy_migrated';
+const DEMO_SEEDED_META = 'demo_seeded';
 
 type LastValues = Readonly<Record<string, ExerciseValues>>;
 
-function readFromStorage<T>(key: string): T | null {
+interface LegacyData {
+  readonly days: readonly DayKey[];
+  readonly routines: RoutineMap;
+  readonly logs: SessionLogs;
+  readonly lastValues: LastValues;
+  readonly sessions: readonly WorkoutSession[];
+  readonly demoSeeded: boolean;
+}
+
+function readLegacyJson<T>(key: string): T | null {
   if (typeof localStorage === 'undefined') {
     return null;
   }
@@ -48,17 +60,6 @@ function readFromStorage<T>(key: string): T | null {
     return raw ? (JSON.parse(raw) as T) : null;
   } catch {
     return null;
-  }
-}
-
-function writeToStorage(key: string, value: unknown): void {
-  if (typeof localStorage === 'undefined') {
-    return;
-  }
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Storage can be unavailable (private mode, quota); the in-memory state stays authoritative.
   }
 }
 
@@ -77,16 +78,21 @@ export interface DaySelection {
 
 /**
  * Single source of truth for the weekly plan — one independent routine per day — the
- * per-day workout log (extra sets included) and the last values used per exercise.
- * Signal based, mirrored into `localStorage` so the MVP survives a reload.
+ * per-day workout log (extra sets included), the last values used per exercise and the
+ * finished sessions. State is signal based; persistence goes through `RoutineRepository`
+ * (SQLite in the app), and is hydrated once during app bootstrap.
  */
 @Injectable({ providedIn: 'root' })
 export class RoutineStore {
-  private readonly planState = signal<TrainingPlan | null>(this.readPlan());
-  private readonly logsState = signal<SessionLogs>(this.readLogs());
-  private readonly lastValuesState = signal<LastValues>(this.readLastValues());
-  private readonly sessionsState = signal<readonly WorkoutSession[]>(this.readSessions());
+  private readonly repository = inject(ROUTINE_REPOSITORY);
+
+  private readonly planState = signal<TrainingPlan | null>(null);
+  private readonly logsState = signal<SessionLogs>({});
+  private readonly lastValuesState = signal<LastValues>({});
+  private readonly sessionsState = signal<readonly WorkoutSession[]>([]);
   private readonly draftDaysState = signal<readonly DayKey[] | null>(null);
+  private readonly demoSeededState = signal(false);
+  private initialized = false;
 
   readonly plan = this.planState.asReadonly();
   readonly hasPlan = computed(() => {
@@ -101,14 +107,33 @@ export class RoutineStore {
   );
   readonly totalSeries = computed(() =>
     this.days().reduce(
-      (total, day) =>
-        total + this.routinesFor(day).reduce((sum, item) => sum + item.series, 0),
+      (total, day) => total + this.routinesFor(day).reduce((sum, item) => sum + item.series, 0),
       0,
     ),
   );
 
   /** Days picked in the setup flow before the plan is saved. */
   readonly draftDays = this.draftDaysState.asReadonly();
+
+  /** Loads the persisted state once. Called by the app initializer before rendering. */
+  async init(): Promise<void> {
+    if (this.initialized) {
+      return;
+    }
+
+    let snapshot = await this.repository.load();
+    if (snapshot.meta[LEGACY_MIGRATED_META] !== '1' && this.isBlank(snapshot)) {
+      const legacy = this.readLegacy();
+      if (legacy) {
+        await this.importLegacy(legacy);
+        await this.repository.setMeta(LEGACY_MIGRATED_META, '1');
+        snapshot = await this.repository.load();
+      }
+    }
+
+    this.hydrate(snapshot);
+    this.initialized = true;
+  }
 
   setDraftDays(days: readonly DayKey[] | null): void {
     this.draftDaysState.set(days ? sortDays(days) : null);
@@ -181,20 +206,16 @@ export class RoutineStore {
       routines[day] ??= [];
     }
 
-    this.persistPlan({ days: keep, routines, updatedAt: new Date().toISOString() });
+    const plan: TrainingPlan = { days: keep, routines, updatedAt: new Date().toISOString() };
+    this.planState.set(plan);
     this.draftDaysState.set(null);
+    this.persist(() => this.repository.savePlan(plan.days, plan.routines));
   }
 
   clearPlan(): void {
     this.planState.set(null);
     this.draftDaysState.set(null);
-    if (typeof localStorage !== 'undefined') {
-      try {
-        localStorage.removeItem(PLAN_STORAGE_KEY);
-      } catch {
-        // Ignore storage failures; the in-memory plan is already cleared.
-      }
-    }
+    this.persist(() => this.repository.clearPlan());
   }
 
   /** Last values used for an exercise, or the session defaults when it was never logged. */
@@ -240,18 +261,15 @@ export class RoutineStore {
       done: entry.done,
     }));
     dayLogs[exerciseId] = normalized;
-    const logs: SessionLogs = { ...this.logsState(), [day]: dayLogs };
-    this.logsState.set(logs);
-    writeToStorage(LOGS_STORAGE_KEY, logs);
+    this.logsState.set({ ...this.logsState(), [day]: dayLogs });
+
+    this.persist(() => this.repository.saveSets(day, exerciseId, normalized));
 
     const last = normalized[normalized.length - 1];
     if (last) {
-      const values: LastValues = {
-        ...this.lastValuesState(),
-        [exerciseId]: { reps: last.reps, kg: last.kg },
-      };
-      this.lastValuesState.set(values);
-      writeToStorage(LAST_VALUES_STORAGE_KEY, values);
+      const values = { reps: last.reps, kg: last.kg };
+      this.lastValuesState.set({ ...this.lastValuesState(), [exerciseId]: values });
+      this.persist(() => this.repository.saveLastValue(exerciseId, values));
     }
   }
 
@@ -271,7 +289,8 @@ export class RoutineStore {
   }
 
   /** Configured days in weekday order, ready for the "Entrenar" list. */
-  daySelections(): DaySelection[] {    return this.days().map((day) => {
+  daySelections(): DaySelection[] {
+    return this.days().map((day) => {
       const progress = this.dayProgressFor(day);
       return {
         day,
@@ -344,12 +363,14 @@ export class RoutineStore {
     });
   }
 
-  /** Seeds one demo week (previous week plus the current one) only when there is no history. */
+  /** Seeds one demo week only when there is no history and nothing was ever seeded. */
   ensureDemoHistory(reference: Date = new Date()): void {
-    if (this.sessionsState().length > 0 || readFromStorage<boolean>(DEMO_SEEDED_STORAGE_KEY)) {
+    if (this.sessionsState().length > 0 || this.demoSeededState()) {
       return;
     }
-    writeToStorage(DEMO_SEEDED_STORAGE_KEY, true);
+
+    this.demoSeededState.set(true);
+    this.persist(() => this.repository.setMeta(DEMO_SEEDED_META, '1'));
 
     const monday = startOfWeek(reference);
     const today = toIsoDate(reference);
@@ -422,8 +443,97 @@ export class RoutineStore {
   }
 
   clearDemoSessions(): void {
-    writeToStorage(DEMO_SEEDED_STORAGE_KEY, true);
+    this.demoSeededState.set(true);
+    this.persist(() => this.repository.setMeta(DEMO_SEEDED_META, '1'));
     this.persistSessions(this.sessionsState().filter((session) => !session.demo));
+  }
+
+  private hydrate(snapshot: RoutineSnapshot): void {
+    this.planState.set(
+      snapshot.days.length > 0
+        ? {
+            days: snapshot.days,
+            routines: snapshot.routines,
+            updatedAt: new Date().toISOString(),
+          }
+        : null,
+    );
+    this.logsState.set(snapshot.logs);
+    this.lastValuesState.set(snapshot.lastValues);
+    this.sessionsState.set(snapshot.sessions);
+    this.demoSeededState.set(snapshot.meta[DEMO_SEEDED_META] === '1');
+  }
+
+  private isBlank(snapshot: RoutineSnapshot): boolean {
+    return (
+      snapshot.days.length === 0 &&
+      snapshot.sessions.length === 0 &&
+      Object.keys(snapshot.logs).length === 0
+    );
+  }
+
+  private readLegacy(): LegacyData | null {
+    const plan = readLegacyJson<{ days?: DayKey[]; routines?: RoutineMap }>(LEGACY_PLAN_KEY);
+    const logs = readLegacyJson<SessionLogs>(LEGACY_LOGS_KEY) ?? {};
+    const lastValues = readLegacyJson<LastValues>(LEGACY_LAST_VALUES_KEY) ?? {};
+    const sessions = readLegacyJson<WorkoutSession[]>(LEGACY_SESSIONS_KEY) ?? [];
+    const demoSeeded = readLegacyJson<boolean>(LEGACY_DEMO_KEY) === true;
+    const days = (plan?.days ?? []).filter((day) => DAY_ORDER.includes(day));
+
+    if (days.length === 0 && sessions.length === 0 && Object.keys(logs).length === 0) {
+      return null;
+    }
+
+    return { days, routines: plan?.routines ?? {}, logs, lastValues, sessions, demoSeeded };
+  }
+
+  private async importLegacy(legacy: LegacyData): Promise<void> {
+    await this.repository.savePlan(legacy.days, legacy.routines);
+
+    for (const [day, exercises] of Object.entries(legacy.logs)) {
+      if (!DAY_ORDER.includes(day as DayKey) || !exercises) {
+        continue;
+      }
+      for (const [exerciseId, entries] of Object.entries(exercises)) {
+        await this.repository.saveSets(day as DayKey, exerciseId, entries);
+      }
+    }
+
+    for (const [exerciseId, values] of Object.entries(legacy.lastValues)) {
+      await this.repository.saveLastValue(exerciseId, values);
+    }
+
+    if (legacy.sessions.length > 0) {
+      await this.repository.replaceSessions(legacy.sessions);
+    }
+    if (legacy.demoSeeded) {
+      await this.repository.setMeta(DEMO_SEEDED_META, '1');
+    }
+  }
+
+  private updateRoutine(day: DayKey, routine: readonly PlannedExercise[]): void {
+    const plan = this.planState();
+    if (!plan) {
+      return;
+    }
+    this.planState.set({
+      days: plan.days,
+      routines: { ...plan.routines, [day]: routine.map((item) => ({ ...item })) },
+      updatedAt: new Date().toISOString(),
+    });
+    this.persist(() => this.repository.saveRoutine(day, routine));
+  }
+
+  private clearDayLogs(day: DayKey): void {
+    const logs: Record<string, unknown> = { ...this.logsState() };
+    delete logs[day];
+    this.logsState.set(logs as SessionLogs);
+    this.persist(() => this.repository.deleteDayLogs(day));
+  }
+
+  private persistSessions(sessions: readonly WorkoutSession[]): void {
+    this.sessionsState.set(sessions);
+    this.persist(() => this.repository.replaceSessions(sessions));
   }
 
   private focusFor(day: DayKey): string {
@@ -437,138 +547,9 @@ export class RoutineStore {
     return groups.size > 1 ? 'FULL BODY' : [...groups][0];
   }
 
-  private clearDayLogs(day: DayKey): void {
-    const logs: Record<string, unknown> = { ...this.logsState() };
-    delete logs[day];
-    this.logsState.set(logs as SessionLogs);
-    writeToStorage(LOGS_STORAGE_KEY, logs);
-  }
-
-  private persistSessions(sessions: readonly WorkoutSession[]): void {
-    this.sessionsState.set(sessions);
-    writeToStorage(SESSIONS_STORAGE_KEY, sessions);
-  }
-
-  private updateRoutine(day: DayKey, routine: readonly PlannedExercise[]): void {
-    const plan = this.planState();
-    if (!plan) {
-      return;
-    }
-    this.persistPlan({
-      days: plan.days,
-      routines: { ...plan.routines, [day]: routine.map((item) => ({ ...item })) },
-      updatedAt: new Date().toISOString(),
+  private persist(write: () => Promise<void>): void {
+    void write().catch((error) => {
+      console.error('[Rutigym] no se pudo guardar en SQLite', error);
     });
-  }
-
-  private persistPlan(plan: TrainingPlan): void {
-    this.planState.set(plan);
-    writeToStorage(PLAN_STORAGE_KEY, plan);
-  }
-
-  private readPlan(): TrainingPlan | null {
-    const stored = readFromStorage<TrainingPlan>(PLAN_STORAGE_KEY);
-    if (!stored || !Array.isArray(stored.days) || stored.days.length === 0) {
-      return null;
-    }
-
-    const routines: Partial<Record<DayKey, readonly PlannedExercise[]>> = {};
-    const storedRoutines = (stored.routines ?? {}) as Record<
-      string,
-      readonly PlannedExercise[] | undefined
-    >;
-    for (const [day, routine] of Object.entries(storedRoutines)) {
-      if (!DAY_ORDER.includes(day as DayKey) || !Array.isArray(routine)) {
-        continue;
-      }
-      routines[day as DayKey] = routine
-        .filter((item) => !!exerciseById(item.exerciseId))
-        .map((item) => ({ exerciseId: item.exerciseId, series: clampSeries(Number(item.series)) }));
-    }
-
-    return {
-      days: sortDays(stored.days.filter((day) => DAY_ORDER.includes(day))),
-      routines,
-      updatedAt: stored.updatedAt ?? new Date().toISOString(),
-    };
-  }
-
-  private readLogs(): SessionLogs {
-    const stored = readFromStorage<SessionLogs>(LOGS_STORAGE_KEY);
-    if (!stored || typeof stored !== 'object') {
-      return {};
-    }
-
-    const logs: Record<string, Record<string, readonly SetEntry[]>> = {};
-    for (const [day, exercises] of Object.entries(stored as Record<string, unknown>)) {
-      if (!DAY_ORDER.includes(day as DayKey) || !exercises || typeof exercises !== 'object') {
-        continue;
-      }
-      const byExercise: Record<string, readonly SetEntry[]> = {};
-      for (const [exerciseId, entries] of Object.entries(exercises as Record<string, unknown>)) {
-        if (!Array.isArray(entries)) {
-          continue;
-        }
-        byExercise[exerciseId] = entries.map((entry: Partial<SetEntry>) => ({
-          reps: clampReps(Number(entry?.reps ?? DEFAULT_REPS)),
-          kg: clampKg(Number(entry?.kg ?? DEFAULT_KG)),
-          done: !!entry?.done,
-        }));
-      }
-      logs[day] = byExercise;
-    }
-    return logs;
-  }
-
-  private readSessions(): readonly WorkoutSession[] {
-    const stored = readFromStorage<WorkoutSession[]>(SESSIONS_STORAGE_KEY);
-    if (!Array.isArray(stored)) {
-      return [];
-    }
-
-    return stored
-      .filter(
-        (session) =>
-          !!session &&
-          typeof session.date === 'string' &&
-          DAY_ORDER.includes(session.day as DayKey),
-      )
-      .map((session) => ({
-        id: session.id ?? `${session.date}-${session.day}`,
-        date: session.date,
-        day: session.day,
-        demo: !!session.demo,
-        exercises: Array.isArray(session.exercises)
-          ? session.exercises
-              .filter((exercise) => !!exerciseById(exercise.exerciseId))
-              .map((exercise) => ({
-                exerciseId: exercise.exerciseId,
-                sets: Array.isArray(exercise.sets)
-                  ? (exercise.sets as readonly SetEntry[]).map((set) => ({
-                      reps: clampReps(Number(set.reps)),
-                      kg: clampKg(Number(set.kg)),
-                      done: !!set.done,
-                    }))
-                  : [],
-              }))
-          : [],
-      }));
-  }
-
-  private readLastValues(): LastValues {    const stored = readFromStorage<Record<string, Partial<ExerciseValues>>>(LAST_VALUES_STORAGE_KEY);
-    if (!stored || typeof stored !== 'object') {
-      return {};
-    }
-    const values: Record<string, ExerciseValues> = {};
-    for (const [exerciseId, entry] of Object.entries(stored)) {
-      if (!entry || typeof entry !== 'object') {
-        continue;
-      }
-      values[exerciseId] = {
-        reps: clampReps(Number(entry.reps ?? DEFAULT_REPS)),
-        kg: clampKg(Number(entry.kg ?? DEFAULT_KG)),
-      };
-    }
-    return values;
   }
 }

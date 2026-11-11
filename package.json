@@ -32,7 +32,9 @@
     "@capacitor/android": "^8.6.0",
     "@capacitor/core": "^8.6.0",
     "@capacitor/ios": "^8.6.0",
+    "jeep-sqlite": "^2.8.0",
     "rxjs": "~7.8.0",
+    "sql.js": "1.11.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },

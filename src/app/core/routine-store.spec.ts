@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
+import { MemoryRoutineRepository } from './data/memory-routine.repository';
+import { ROUTINE_REPOSITORY } from './data/routine.repository';
 import { RoutineStore } from './routine-store';
 
 function ids(entries: readonly { exerciseId: string }[]): string[] {
@@ -9,10 +11,13 @@ function ids(entries: readonly { exerciseId: string }[]): string[] {
 describe('RoutineStore', () => {
   let store: RoutineStore;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     localStorage.clear();
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [{ provide: ROUTINE_REPOSITORY, useClass: MemoryRoutineRepository }],
+    });
     store = TestBed.inject(RoutineStore);
+    await store.init();
   });
 
   afterEach(() => localStorage.clear());
@@ -64,12 +69,13 @@ describe('RoutineStore', () => {
     expect(store.routinesFor('mon')).toEqual([]);
   });
 
-  it('persists the routines of every day across store instances', () => {
+  it('persists the routines of every day across store instances', async () => {
     store.savePlan(['mon', 'fri']);
     store.addExercise('mon', 'core-plancha', 4);
     store.addExercise('fri', 'piernas-prensa', 2);
 
     const reloaded = TestBed.runInInjectionContext(() => new RoutineStore());
+    await reloaded.init();
 
     expect(reloaded.days()).toEqual(['mon', 'fri']);
     expect(ids(reloaded.routinesFor('mon'))).toEqual(['core-plancha']);
@@ -104,7 +110,7 @@ describe('RoutineStore', () => {
     ]);
   });
 
-  it('allows extra series beyond the configured ones and keeps them', () => {
+  it('allows extra series beyond the configured ones and keeps them', async () => {
     store.savePlan(['mon']);
     store.addExercise('mon', 'core-plancha', 2);
 
@@ -123,6 +129,7 @@ describe('RoutineStore', () => {
     ]);
 
     const reloaded = TestBed.runInInjectionContext(() => new RoutineStore());
+    await reloaded.init();
     expect(reloaded.setsFor('mon', 'core-plancha').length).toBe(4);
     expect(reloaded.progressFor('mon', 'core-plancha')).toEqual({ done: 4, total: 4 });
   });
