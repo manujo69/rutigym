@@ -22,7 +22,7 @@
         [class.week__tile--done]="day.state === 'done'"
         [class.week__tile--rest]="day.state === 'rest'"
       >
-        <span class="week__number">{{ day.number }}</span>
+    <span class="week__letter">{{ day.letter }}</span>
         <span class="week__label">{{ day.label }}</span>
 
         @switch (day.state) {

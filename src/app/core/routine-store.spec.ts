@@ -235,7 +235,7 @@ describe('RoutineStore', () => {
 
       const week = store.weekOverview(wednesday);
 
-      expect(week.map((day) => day.number)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+      expect(week.map((day) => day.letter)).toEqual(['L', 'M', 'X', 'J', 'V', 'S', 'D']);
       expect(week[0].state).toBe('done');
       expect(week[1].state).toBe('rest');
       expect(week[2].state).toBe('done');

@@ -47,7 +47,7 @@ afecta a los demás, y un día puede quedar sin ejercicios (la pantalla de entre
 - **Terminar día** toma las series completadas de ese día, las guarda como una **sesión con fecha**
   (ejercicios + kg/reps de cada serie) y limpia el registro activo para la próxima sesión. Un día sin
   series completadas no genera sesión.
-- La pantalla `/progreso` muestra la semana actual en siete casillas (`1`–`7`): azul con check si ese
+- Las siete casillas de la semana usan las iniciales `L M X J V S D`: azul con check si ese
   día tiene sesión, contorno con mancuerna si está planificado y pendiente, y gris para descanso.
 - Debajo, una tarjeta por sesión terminada con cada ejercicio y sus series como `kg × reps`
   (los ejercicios a peso corporal se muestran como `reps`).

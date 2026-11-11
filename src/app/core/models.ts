@@ -57,7 +57,7 @@ export type WeekDayState = 'done' | 'planned' | 'rest';
 export interface WeekDay {
   readonly date: string;
   readonly day: DayKey;
-  readonly number: number;
+  readonly letter: string;
   readonly label: string;
   readonly state: WeekDayState;
 }

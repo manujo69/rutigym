@@ -2,10 +2,11 @@ import { Injectable, computed, signal } from '@angular/core';
 
 import { exerciseById } from './exercise-catalog';
 import {
+  DAY_LABELS,
+  DAY_ORDER,
   DEFAULT_KG,
   DEFAULT_REPS,
   DEFAULT_SERIES,
-  DAY_ORDER,
   DayKey,
   Exercise,
   ExerciseGroup,
@@ -335,7 +336,7 @@ export class RoutineStore {
       return {
         date,
         day,
-        number: index + 1,
+        letter: DAY_LABELS[day].letter,
         label: planned ? this.focusFor(day) : 'Descanso',
         state: sessions.some((session) => session.date === date)
           ? 'done'
