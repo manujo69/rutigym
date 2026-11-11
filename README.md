@@ -21,29 +21,36 @@ Tema visual azul (azul marino profundo → azul vivo, superficies azul claro). T
 | Ruta | Pantalla | Contenido |
 | --- | --- | --- |
 | `/` | Inicio | Marca, resumen del plan y dos botones grandes: **Entrenar** y **Configurar** |
-| `/configurar` | Configuración | Días de entrenamiento (`LUNES, MIÉRCOLES y VIERNES`) con **Borrar** si hay plan o **Empezar** si no lo hay |
+| `/configurar` | Configuración | Días de entrenamiento (`LUNES, MIÉRCOLES y VIERNES`), **Borrar** y la lista de rutinas por día con su resumen |
 | `/configurar/dias` | Días | Pregunta cuántos días entrenar y permite marcar `L M X J V S D` en selección múltiple |
-| `/configurar/ejercicios` | Ejercicios | Listado agrupado en **CORE**, **PIERNAS** y **BRAZOS** con el número de series por ejercicio |
-| `/entrenar` | Entrenar | Listado de días del plan, con el día actual preseleccionado, y botón **Empezar** |
-| `/entrenar/:day` | Rutina del día | Ejercicios del día agrupados por bloque, con progreso de series registradas |
+| `/configurar/rutinas/:day` | Rutina del día | Chips `L M X J V S D` para cambiar de día; la rutina arranca vacía y se van sumando ejercicios con sus series |
+| `/configurar/rutinas/:day/agregar` | Añadir ejercicios | Catálogo agrupado en **CORE**, **PIERNAS** y **BRAZOS** con selección múltiple; los ya añadidos aparecen deshabilitados |
+| `/entrenar` | Entrenar | Días del plan con sus ejercicios y series, con el día actual preseleccionado y botón **Empezar** |
+| `/entrenar/:day` | Rutina del día | Ejercicios del día agrupados por bloque, con progreso de series registradas y aviso cuando el día está vacío |
 | `/entrenar/:day/:exerciseId` | Registro | Repeticiones y kilos por serie, con marca de serie completada |
 
 ### Flujo
 
 ```
-Inicio ─┬─ Configurar ─┬─ (sin plan)  Empezar ─ Días ─ Ejercicios ─ Guardar rutina
-        │               └─ (con plan)  Borrar / Editar ejercicios
+Inicio ─┬─ Configurar ─┬─ (sin plan)  Empezar ─ Días ─ Rutina del día ─ Añadir ejercicios ─ Listo
+        │               └─ (con plan)  Borrar / Editar días / Editar cada día
         └─ Entrenar ─ Día ─ Ejercicio ─ Registrar series ─ Guardar
 ```
+
+Cada día configurado tiene su propia rutina independiente: añadir o quitar ejercicios en un día no
+afecta a los demás, y un día puede quedar sin ejercicios (la pantalla de entrenamiento lo avisa).
 
 ### Persistencia
 
 El MVP no usa backend. El plan semanal y el registro de series se guardan en `localStorage`:
 
-- `rutigym.plan.v1` → días de la semana y series por ejercicio.
+- `rutigym.plan.v2` → días configurados y la rutina de cada día (`routines[day]`, en orden de alta).
 - `rutigym.logs.v1` → repeticiones y kilos registrados por día y ejercicio.
 
-La integración de `@capacitor-community/sqlite` queda para una siguiente iteración; el acceso al almacenamiento está aislado en `RoutineStore` para poder sustituirlo sin tocar las pantallas.
+La clave del plan es `v2`: un plan guardado con el modelo anterior (`v1`, una rutina compartida) no se
+lee, tal como corresponde a este MVP sin usuarios reales. La integración de
+`@capacitor-community/sqlite` queda para una siguiente iteración; el acceso al almacenamiento está
+aislado en `RoutineStore` para poder sustituirlo sin tocar las pantallas.
 
 ## Estructura del proyecto
 
@@ -62,7 +69,8 @@ rutigym/
 │   │   │   ├── home/home.page.*
 │   │   │   ├── config/config.page.*
 │   │   │   ├── config/config-days.page.*
-│   │   │   ├── config/config-exercises.page.*
+│   │   │   ├── config/config-day.page.*
+│   │   │   ├── config/config-add-exercises.page.*
 │   │   │   ├── train/train.page.*
 │   │   │   ├── train/train-day.page.*
 │   │   │   └── train/exercise-log.page.*
@@ -119,8 +127,9 @@ Los tests se ejecutan con Karma y Chrome en modo headless:
 CHROME_BIN=/usr/bin/google-chrome npm test -- --watch=false --browsers=ChromeHeadless
 ```
 
-La lógica cubierta es la del estado (`RoutineStore`): formato de días, persistencia, series por
-ejercicio, alta y borrado del plan y progreso por ejercicio y por día.
+La lógica cubierta es la del estado (`RoutineStore`): formato de días, rutinas independientes por día,
+alta explícita de ejercicios, series por ejercicio, persistencia, borrado de un día o del plan completo
+y progreso por ejercicio y por día.
 
 ## Sincronización con Capacitor
 
