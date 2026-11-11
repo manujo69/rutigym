@@ -44,21 +44,24 @@ afecta a los demás, y un día puede quedar sin ejercicios (la pantalla de entre
 
 ### Imágenes de ejercicios
 
-Los renders de máquinas viven en `public/exercises/` (WebP de 720 px, fondo transparente) y el
+Los renders de máquinas viven en `public/exercises/` (WebP de 720 px sobre fondo blanco) y el
 catálogo los referencia con el campo `image`:
 
 ```ts
-{ id: 'piernas-extension', name: 'Extensión de cuádriceps', group: 'PIERNAS',
-  image: '/exercises/leg-extension.webp' },
+{ id: 'core-press-pecho', name: 'Press de pecho en máquina', group: 'CORE',
+  image: '/exercises/chest-press.webp' },
 ```
 
-- La pantalla de registro (`/entrenar/:day/:exerciseId`) muestra la imagen en una tarjeta suave
+Los grupos son deliberadamente amplios: **CORE** incluye los ejercicios de pecho y **BRAZOS** los de
+hombro; no hay grupos separados de PECHO ni HOMBRO.
+
+- La pantalla de registro (`/entrenar/:day/:exerciseId`) muestra la imagen en una tarjeta blanca
   entre la barra de progreso y la lista de series.
 - Si el ejercicio no tiene `image`, la tarjeta **no se renderiza** (sin huecos ni imágenes roscas).
-- Hoy tienen imagen `piernas-extension` y `brazos-curl-barra`. Los otros cinco renders disponibles
-  (contractora, jalón al pecho, remo sentado, press de pecho y press de hombros) corresponden a
-  pecho, espalda y hombro, grupos que todavía no existen en el catálogo: quedan cargados como
-  assets para cuando se sumen.
+- Hoy usan imagen: `core-contractora`, `core-press-pecho`, `brazos-press-hombros`,
+  `piernas-extension` y `brazos-curl-barra`.
+- Quedan cargados sin usar `lat-pulley.webp` y `seated-row.webp` (jalón al pecho y remo sentado),
+  a la espera de decidir en qué grupo entran.
 
 ### Progreso
 - **Terminar día** toma las series completadas de ese día, las guarda como una **sesión con fecha**
