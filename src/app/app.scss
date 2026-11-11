@@ -1,0 +1,31 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.app-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 520px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  overflow-x: hidden;
+  background: var(--bg);
+  box-shadow: 0 0 90px rgba(8, 17, 51, 0.12);
+}
+
+/* The routed page must stretch with the frame so sticky actions sit at the bottom. */
+.app-frame > router-outlet + * {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+@media (min-width: 560px) {
+  .app-frame {
+    border-inline: 1px solid rgba(195, 208, 255, 0.65);
+  }
+}

@@ -1,0 +1,45 @@
+<section class="page home">
+  <header class="home__top">
+    <span class="home__logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10" />
+      </svg>
+    </span>
+    <div class="home__brand">
+      <p class="home__name">Rutigym</p>
+      <span class="eyebrow">MVP · v0.1</span>
+    </div>
+  </header>
+
+  <div class="home__hero">
+    <span class="home__glow" aria-hidden="true"></span>
+    <div class="home__hero-body">
+      <span class="eyebrow home__eyebrow">Semana a la vista</span>
+      <h1 class="home__title">Entrena<br /><span>con foco.</span></h1>
+      <p class="home__subtitle">
+        Planifica tus días, elige tus series y registra cada repetición.
+      </p>
+    </div>
+
+    <div class="home__plan">
+      @if (store.hasPlan()) {
+        <span class="home__plan-label">Tu plan</span>
+        <p class="home__plan-days">{{ store.daysLabel() }}</p>
+        <p class="home__plan-meta">
+          {{ store.plannedExercises().length }} ejercicios · {{ store.totalSeries() }} series por sesión
+        </p>
+      } @else {
+        <span class="home__plan-label">Sin rutina</span>
+        <p class="home__plan-days">Todavía sin configurar</p>
+        <p class="home__plan-meta">Elige tus días para empezar</p>
+      }
+    </div>
+  </div>
+
+  <nav class="home__actions" aria-label="Acciones principales">
+    <a class="btn btn--primary btn--lg" routerLink="/entrenar">Entrenar</a>
+    <a class="btn btn--outline btn--lg" routerLink="/configurar">Configurar</a>
+  </nav>
+
+  <p class="home__footnote">Tus datos se guardan en este dispositivo.</p>
+</section>
