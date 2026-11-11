@@ -15,13 +15,15 @@ export const EXERCISES: readonly Exercise[] = [
   { id: 'piernas-peso-muerto', name: 'Peso muerto rumano', group: 'PIERNAS' },
   { id: 'piernas-extension', name: 'Extensión de cuádriceps', group: 'PIERNAS', image: '/exercises/leg-extension.webp' },
   { id: 'piernas-curl-femoral', name: 'Curl femoral tumbado', group: 'PIERNAS' },
+  { id: 'piernas-abduccion', name: 'Abducción de cadera en máquina', group: 'PIERNAS', image: '/exercises/hip-abduction.webp' },
 
   { id: 'brazos-curl-barra', name: 'Curl de bíceps con barra', group: 'BRAZOS', image: '/exercises/preacher-curl.webp' },
   { id: 'brazos-curl-martillo', name: 'Curl martillo', group: 'BRAZOS' },
   { id: 'brazos-press-frances', name: 'Press francés', group: 'BRAZOS' },
-  { id: 'brazos-jalon-triceps', name: 'Jalón de tríceps en polea', group: 'BRAZOS' },
+  { id: 'brazos-jalon-triceps', name: 'Jalón de tríceps en polea', group: 'BRAZOS', image: '/exercises/triceps-pushdown.webp' },
   { id: 'brazos-fondos', name: 'Fondos en paralelas', group: 'BRAZOS' },
   { id: 'brazos-press-hombros', name: 'Press de hombros en máquina', group: 'BRAZOS', image: '/exercises/shoulder-press.webp' },
+  { id: 'brazos-deltoides-posterior', name: 'Deltoides posterior en máquina', group: 'BRAZOS', image: '/exercises/rear-delt.webp' },
 
   { id: 'espalda-jalon-pecho', name: 'Jalón al pecho', group: 'ESPALDA', image: '/exercises/lat-pulley.webp' },
   { id: 'espalda-remo-sentado', name: 'Remo sentado', group: 'ESPALDA', image: '/exercises/seated-row.webp' },
