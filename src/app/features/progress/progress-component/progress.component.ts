@@ -1,7 +1,7 @@
-import { Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { exerciseById } from '../../core/exercise-catalog';
+import { exerciseById } from '../../../core/exercise-catalog';
 import {
   DAY_LABELS,
   WeekDay,
@@ -10,8 +10,8 @@ import {
   formatSessionDate,
   parseIsoDate,
   toIsoDate,
-} from '../../core/models';
-import { RoutineStore } from '../../core/routine-store';
+} from '../../../core/models';
+import { RoutineStore } from '../../../core/routine-store';
 
 interface SessionRow {
   readonly name: string;
@@ -29,12 +29,13 @@ interface SessionCard {
 }
 
 @Component({
-  selector: 'app-progress-page',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-progress',
   imports: [RouterLink],
-  templateUrl: './progress.page.html',
-  styleUrl: './progress.page.scss',
+  templateUrl: './progress.component.html',
+  styleUrl: './progress.component.scss',
 })
-export class ProgressPage {
+export class ProgressComponent {
   private readonly store = inject(RoutineStore);
 
   protected readonly labels = DAY_LABELS;

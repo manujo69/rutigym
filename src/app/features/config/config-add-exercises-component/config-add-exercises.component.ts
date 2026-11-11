@@ -1,17 +1,18 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
-import { GROUP_ORDER, exercisesOfGroup } from '../../core/exercise-catalog';
-import { DAY_LABELS, DAY_ORDER, DayKey } from '../../core/models';
-import { RoutineStore } from '../../core/routine-store';
+import { GROUP_ORDER, exercisesOfGroup } from '../../../core/exercise-catalog';
+import { DAY_LABELS, DAY_ORDER, DayKey } from '../../../core/models';
+import { RoutineStore } from '../../../core/routine-store';
 
 @Component({
-  selector: 'app-config-add-exercises-page',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-config-add-exercises',
   imports: [RouterLink],
-  templateUrl: './config-add-exercises.page.html',
-  styleUrl: './config-add-exercises.page.scss',
+  templateUrl: './config-add-exercises.component.html',
+  styleUrl: './config-add-exercises.component.scss',
 })
-export class ConfigAddExercisesPage {
+export class ConfigAddExercisesComponent {
   private readonly store = inject(RoutineStore);
   private readonly router = inject(Router);
 

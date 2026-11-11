@@ -122,14 +122,15 @@ rutigym/
 │   │   │   ├── routine-store.ts     # Estado del plan y del registro (signals)
 │   │   │   └── routine-store.spec.ts
 │   │   ├── features/
-│   │   │   ├── home/home.page.*
-│   │   │   ├── config/config.page.*
-│   │   │   ├── config/config-days.page.*
-│   │   │   ├── config/config-day.page.*
-│   │   │   ├── config/config-add-exercises.page.*
-│   │   │   ├── train/train.page.*
-│   │   │   ├── train/train-day.page.*
-│   │   │   ├── train/exercise-log.page.*
+│   │   │   ├── home/home-component/home.component.*
+│   │   │   ├── config/config-component/config.component.*
+│   │   │   ├── config/config-days-component/config-days.component.*
+│   │   │   ├── config/config-day-component/config-day.component.*
+│   │   │   ├── config/config-add-exercises-component/config-add-exercises.component.*
+│   │   │   ├── train/train-component/train.component.*
+│   │   │   ├── train/train-day-component/train-day.component.*
+│   │   │   ├── train/exercise-log-component/exercise-log.component.*
+│   │   │   └── progress/progress-component/progress.component.*
 │   │   │   └── progress/progress.page.*
 │   │   ├── app.ts / app.html / app.scss
 │   │   ├── app.config.ts
@@ -184,10 +185,11 @@ Los tests se ejecutan con Karma y Chrome en modo headless:
 CHROME_BIN=/usr/bin/google-chrome npm test -- --watch=false --browsers=ChromeHeadless
 ```
 
-La lógica cubierta es la del estado (`RoutineStore`): formato de días, rutinas independientes por día,
-alta explícita de ejercicios, series por ejercicio, valores por defecto y series extra, persistencia,
-borrado de un día o del plan completo, progreso por ejercicio y por día, sesiones terminadas y la
-semana de ejemplo del histórico.
+La lógica cubierta es la del estado (`RoutineStore`) y el comportamiento de cada pantalla: formato de
+días, rutinas independientes por día, alta explícita de ejercicios, series por ejercicio, valores por
+defecto y series extra, persistencia, borrado, progreso, sesiones terminadas y la semana de ejemplo.
+Cada componente vive en su carpeta `<name>-component/` con `templateUrl`/`styleUrl`, `OnPush` y su
+propio `.component.spec.ts`.
 
 ## Sincronización con Capacitor
 

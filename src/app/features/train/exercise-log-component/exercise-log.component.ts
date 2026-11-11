@@ -1,7 +1,7 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
-import { exerciseById } from '../../core/exercise-catalog';
+import { exerciseById } from '../../../core/exercise-catalog';
 import {
   DAY_ORDER,
   DayKey,
@@ -10,16 +10,17 @@ import {
   SetEntry,
   clampKg,
   clampReps,
-} from '../../core/models';
-import { RoutineStore } from '../../core/routine-store';
+} from '../../../core/models';
+import { RoutineStore } from '../../../core/routine-store';
 
 @Component({
-  selector: 'app-exercise-log-page',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-exercise-log',
   imports: [RouterLink],
-  templateUrl: './exercise-log.page.html',
-  styleUrl: './exercise-log.page.scss',
+  templateUrl: './exercise-log.component.html',
+  styleUrl: './exercise-log.component.scss',
 })
-export class ExerciseLogPage {
+export class ExerciseLogComponent {
   private readonly store = inject(RoutineStore);
   private readonly router = inject(Router);
 

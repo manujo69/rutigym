@@ -1,9 +1,9 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
-import { exerciseById } from '../../core/exercise-catalog';
-import { DAY_LABELS, DAY_ORDER, DayKey } from '../../core/models';
-import { RoutineStore } from '../../core/routine-store';
+import { exerciseById } from '../../../core/exercise-catalog';
+import { DAY_LABELS, DAY_ORDER, DayKey } from '../../../core/models';
+import { RoutineStore } from '../../../core/routine-store';
 
 interface RoutineRow {
   readonly id: string;
@@ -13,12 +13,13 @@ interface RoutineRow {
 }
 
 @Component({
-  selector: 'app-config-day-page',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-config-day',
   imports: [RouterLink],
-  templateUrl: './config-day.page.html',
-  styleUrl: './config-day.page.scss',
+  templateUrl: './config-day.component.html',
+  styleUrl: './config-day.component.scss',
 })
-export class ConfigDayPage {
+export class ConfigDayComponent {
   private readonly store = inject(RoutineStore);
   private readonly router = inject(Router);
 

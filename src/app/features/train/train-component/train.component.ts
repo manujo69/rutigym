@@ -1,16 +1,17 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
-import { DAY_LABELS, DayKey, todayKey } from '../../core/models';
-import { RoutineStore } from '../../core/routine-store';
+import { DAY_LABELS, DayKey, todayKey } from '../../../core/models';
+import { RoutineStore } from '../../../core/routine-store';
 
 @Component({
-  selector: 'app-train-page',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-train',
   imports: [RouterLink],
-  templateUrl: './train.page.html',
-  styleUrl: './train.page.scss',
+  templateUrl: './train.component.html',
+  styleUrl: './train.component.scss',
 })
-export class TrainPage {
+export class TrainComponent {
   protected readonly store = inject(RoutineStore);
   private readonly router = inject(Router);
 

@@ -1,9 +1,9 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
-import { exerciseById } from '../../core/exercise-catalog';
-import { DAY_LABELS, DAY_ORDER, DayKey } from '../../core/models';
-import { RoutineStore } from '../../core/routine-store';
+import { exerciseById } from '../../../core/exercise-catalog';
+import { DAY_LABELS, DAY_ORDER, DayKey } from '../../../core/models';
+import { RoutineStore } from '../../../core/routine-store';
 
 interface ExerciseRow {
   readonly id: string;
@@ -18,12 +18,13 @@ interface ExerciseSection {
 }
 
 @Component({
-  selector: 'app-train-day-page',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-train-day',
   imports: [RouterLink],
-  templateUrl: './train-day.page.html',
-  styleUrl: './train-day.page.scss',
+  templateUrl: './train-day.component.html',
+  styleUrl: './train-day.component.scss',
 })
-export class TrainDayPage {
+export class TrainDayComponent {
   protected readonly store = inject(RoutineStore);
   private readonly router = inject(Router);
 

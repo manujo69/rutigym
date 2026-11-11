@@ -1,19 +1,20 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
-import { DAY_LABELS, DAY_ORDER, DayKey, formatDays, sortDays } from '../../core/models';
-import { RoutineStore } from '../../core/routine-store';
+import { DAY_LABELS, DAY_ORDER, DayKey, formatDays, sortDays } from '../../../core/models';
+import { RoutineStore } from '../../../core/routine-store';
 
 const MIN_DAYS = 1;
 const MAX_DAYS = 7;
 
 @Component({
-  selector: 'app-config-days-page',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-config-days',
   imports: [RouterLink],
-  templateUrl: './config-days.page.html',
-  styleUrl: './config-days.page.scss',
+  templateUrl: './config-days.component.html',
+  styleUrl: './config-days.component.scss',
 })
-export class ConfigDaysPage {
+export class ConfigDaysComponent {
   private readonly store = inject(RoutineStore);
   private readonly router = inject(Router);
 
