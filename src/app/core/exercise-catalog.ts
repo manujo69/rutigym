@@ -4,8 +4,11 @@ export const EXERCISES: readonly Exercise[] = [
   { id: 'core-plancha', name: 'Plancha abdominal', group: 'CORE' },
   { id: 'core-elevacion-piernas', name: 'Elevación de piernas', group: 'CORE' },
   { id: 'core-crunch-polea', name: 'Crunch en polea alta', group: 'CORE' },
+  { id: 'core-crunch-maquina', name: 'Crunch en máquina', group: 'CORE' },
   { id: 'core-rueda', name: 'Rueda abdominal', group: 'CORE' },
   { id: 'core-hollow', name: 'Hollow hold', group: 'CORE' },
+  { id: 'core-press-pallof', name: 'Press Pallof', group: 'CORE' },
+  { id: 'core-dead-bug', name: 'Dead bug', group: 'CORE' },
   { id: 'core-contractora', name: 'Aperturas en contractora', group: 'CORE', image: '/exercises/butterfly.webp' },
   { id: 'core-press-pecho', name: 'Press de pecho en máquina', group: 'CORE', image: '/exercises/chest-press.webp' },
   { id: 'core-press-banca', name: 'Press de banca plano', group: 'CORE', image: '/exercises/bench-press.webp' },
@@ -29,6 +32,8 @@ export const EXERCISES: readonly Exercise[] = [
 
   { id: 'espalda-jalon-pecho', name: 'Jalón al pecho', group: 'ESPALDA', image: '/exercises/lat-pulley.webp' },
   { id: 'espalda-remo-sentado', name: 'Remo sentado', group: 'ESPALDA', image: '/exercises/seated-row.webp' },
+  { id: 'espalda-dominadas', name: 'Dominadas', group: 'ESPALDA' },
+  { id: 'espalda-hiperextensiones', name: 'Hiperextensiones', group: 'ESPALDA' },
   { id: 'espalda-multiestacion', name: 'Multiestación en máquina', group: 'ESPALDA', image: '/exercises/multi-gym.webp' },
 ];
 
