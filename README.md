@@ -9,53 +9,77 @@ Aplicación móvil desarrollada con **Angular 20** y empaquetada como app nativa
 | Framework frontend | Angular | ^20.3.0 |
 | Runtime móvil / nativo | Capacitor (Core, CLI, Android, iOS) | ^8.6.0 |
 | Base de datos local | @capacitor-community/sqlite | ^8.1.1 |
-| Estado reactivo | RxJS | ~7.8.0 |
+| Estado reactivo | Signals de Angular + RxJS | ~7.8.0 |
 | Lenguaje | TypeScript | ~5.9.2 |
-| Estilos | SCSS | — |
+| Estilos | SCSS con design tokens | — |
 | Tests unitarios | Jasmine + Karma | ~5.9.0 / ~6.4.0 |
 
-## Aplicación Capacitor
+## Pantallas del MVP
 
-- **appId**: `com.example.app` (pendiente de personalizar)
-- **appName**: `rutigym`
-- **webDir**: `dist/rutigym/browser`
-- Plataformas nativas incluidas: `android/` (proyecto Gradle ya generado)
+Tema visual azul (azul marino profundo → azul vivo, superficies azul claro). Todas las pantallas están pensadas para móvil y se limitan a un ancho máximo de 520 px.
+
+| Ruta | Pantalla | Contenido |
+| --- | --- | --- |
+| `/` | Inicio | Marca, resumen del plan y dos botones grandes: **Entrenar** y **Configurar** |
+| `/configurar` | Configuración | Días de entrenamiento (`LUNES, MIÉRCOLES y VIERNES`) con **Borrar** si hay plan o **Empezar** si no lo hay |
+| `/configurar/dias` | Días | Pregunta cuántos días entrenar y permite marcar `L M X J V S D` en selección múltiple |
+| `/configurar/ejercicios` | Ejercicios | Listado agrupado en **CORE**, **PIERNAS** y **BRAZOS** con el número de series por ejercicio |
+| `/entrenar` | Entrenar | Listado de días del plan, con el día actual preseleccionado, y botón **Empezar** |
+| `/entrenar/:day` | Rutina del día | Ejercicios del día agrupados por bloque, con progreso de series registradas |
+| `/entrenar/:day/:exerciseId` | Registro | Repeticiones y kilos por serie, con marca de serie completada |
+
+### Flujo
+
+```
+Inicio ─┬─ Configurar ─┬─ (sin plan)  Empezar ─ Días ─ Ejercicios ─ Guardar rutina
+        │               └─ (con plan)  Borrar / Editar ejercicios
+        └─ Entrenar ─ Día ─ Ejercicio ─ Registrar series ─ Guardar
+```
+
+### Persistencia
+
+El MVP no usa backend. El plan semanal y el registro de series se guardan en `localStorage`:
+
+- `rutigym.plan.v1` → días de la semana y series por ejercicio.
+- `rutigym.logs.v1` → repeticiones y kilos registrados por día y ejercicio.
+
+La integración de `@capacitor-community/sqlite` queda para una siguiente iteración; el acceso al almacenamiento está aislado en `RoutineStore` para poder sustituirlo sin tocar las pantallas.
 
 ## Estructura del proyecto
 
 ```
 rutigym/
-├── android/               # Proyecto nativo Android (Gradle)
-├── public/                # Recursos estáticos (favicon.ico)
-├── src/                   # Código fuente de la aplicación
+├── android/                    # Proyecto nativo Android (Gradle)
+├── public/                     # Recursos estáticos
+├── src/
 │   ├── app/
-│   │   ├── app.ts         # Componente raíz (App)
-│   │   ├── app.html       # Plantilla del componente raíz
-│   │   ├── app.scss       # Estilos del componente raíz
-│   │   ├── app.config.ts  # Configuración de la aplicación
-│   │   ├── app.routes.ts  # Definición de rutas (vacío por ahora)
-│   │   └── app.spec.ts    # Tests unitarios del componente raíz
-│   ├── index.html         # HTML de entrada
-│   ├── main.ts            # Bootstrap de la aplicación
-│   └── styles.scss        # Estilos globales
-├── angular.json           # Configuración de Angular + Capacitor
-├── capacitor.config.ts    # Configuración de Capacitor
-├── package.json           # Dependencias y scripts
-└── tsconfig.*.json        # Configuración de TypeScript
+│   │   ├── core/
+│   │   │   ├── models.ts            # Tipos, días de la semana y utilidades
+│   │   │   ├── exercise-catalog.ts  # Catálogo de ejercicios por grupo
+│   │   │   ├── routine-store.ts     # Estado del plan y del registro (signals)
+│   │   │   └── routine-store.spec.ts
+│   │   ├── features/
+│   │   │   ├── home/home.page.*
+│   │   │   ├── config/config.page.*
+│   │   │   ├── config/config-days.page.*
+│   │   │   ├── config/config-exercises.page.*
+│   │   │   ├── train/train.page.*
+│   │   │   ├── train/train-day.page.*
+│   │   │   └── train/exercise-log.page.*
+│   │   ├── app.ts / app.html / app.scss
+│   │   ├── app.config.ts
+│   │   └── app.routes.ts
+│   ├── styles.scss             # Design tokens y estilos compartidos
+│   ├── index.html
+│   └── main.ts
+├── angular.json
+├── capacitor.config.ts
+└── package.json
 ```
-
-## Estado actual del proyecto
-
-- Componente raíz `App` con un `signal` llamado `title` (valor `'rutigym'`).
-- Plantilla `app.html` con contenido placeholder generado por Angular CLI (aún no reemplazado).
-- `app.routes.ts` sin rutas definidas.
-- `app.config.ts` con proveedores estándar: listeners globales de errores, detección de cambios por zona y router.
-- Enrutamiento configurado con `standalone` APIs (sin módulos NgModule).
-- Base de datos SQLite de Capacitor declarada como dependencia, aunque aún sin integración en el código fuente.
 
 ## Requisitos
 
-- Node.js 20+ (el entorno de arranque usa Node v24.18.0)
+- Node.js 20+, 22+ o 24+ (el entorno de arranque usa Node v22.23.3)
 - Angular CLI 20.3.27
 - Android Studio / SDK para la plataforma Android (si se compila la app nativa)
 
@@ -66,8 +90,6 @@ npm install
 ```
 
 ## Desarrollo
-
-Para levantar el servidor de desarrollo:
 
 ```bash
 npm start
@@ -83,31 +105,24 @@ La aplicación se sirve en `http://localhost:4200/` y se recarga automáticament
 
 ## Compilación
 
-Para compilar el proyecto (build de producción por defecto):
-
 ```bash
 npm run build
 ```
 
-Los artefactos se generan en el directorio `dist/`.
-
-### Compilación en modo desarrollo (watch)
-
-```bash
-npm run watch
-```
+Los artefactos se generan en `dist/rutigym`.
 
 ## Tests
 
-Para ejecutar los tests unitarios con Karma:
+Los tests se ejecutan con Karma y Chrome en modo headless:
 
 ```bash
-npm test
+CHROME_BIN=/usr/bin/google-chrome npm test -- --watch=false --browsers=ChromeHeadless
 ```
 
-## Sincronización con Capacitor
+La lógica cubierta es la del estado (`RoutineStore`): formato de días, persistencia, series por
+ejercicio, alta y borrado del plan y progreso por ejercicio y por día.
 
-Para sincronizar el build web con el proyecto nativo:
+## Sincronización con Capacitor
 
 ```bash
 npx cap sync
@@ -116,5 +131,6 @@ npx cap sync
 ## Enlaces útiles
 
 - [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli)
+- [Angular signals](https://angular.dev/guide/signals)
 - [Capacitor Documentation](https://capacitorjs.com/docs)
 - [@capacitor-community/sqlite](https://github.com/capacitor-community/sqlite)
