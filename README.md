@@ -42,8 +42,25 @@ Inicio ─┬─ Configurar ─┬─ (sin plan)  Empezar ─ Días ─ Rutina d
 Cada día configurado tiene su propia rutina independiente: añadir o quitar ejercicios en un día no
 afecta a los demás, y un día puede quedar sin ejercicios (la pantalla de entrenamiento lo avisa).
 
-### Progreso
+### Imágenes de ejercicios
 
+Los renders de máquinas viven en `public/exercises/` (WebP de 720 px, fondo transparente) y el
+catálogo los referencia con el campo `image`:
+
+```ts
+{ id: 'piernas-extension', name: 'Extensión de cuádriceps', group: 'PIERNAS',
+  image: '/exercises/leg-extension.webp' },
+```
+
+- La pantalla de registro (`/entrenar/:day/:exerciseId`) muestra la imagen en una tarjeta suave
+  entre la barra de progreso y la lista de series.
+- Si el ejercicio no tiene `image`, la tarjeta **no se renderiza** (sin huecos ni imágenes roscas).
+- Hoy tienen imagen `piernas-extension` y `brazos-curl-barra`. Los otros cinco renders disponibles
+  (contractora, jalón al pecho, remo sentado, press de pecho y press de hombros) corresponden a
+  pecho, espalda y hombro, grupos que todavía no existen en el catálogo: quedan cargados como
+  assets para cuando se sumen.
+
+### Progreso
 - **Terminar día** toma las series completadas de ese día, las guarda como una **sesión con fecha**
   (ejercicios + kg/reps de cada serie) y limpia el registro activo para la próxima sesión. Un día sin
   series completadas no genera sesión.
@@ -74,11 +91,11 @@ La integración de `@capacitor-community/sqlite` queda para una siguiente iterac
 almacenamiento está aislado en `RoutineStore` para poder sustituirlo sin tocar las pantallas.
 
 ## Estructura del proyecto
-
 ```
 rutigym/
 ├── android/                    # Proyecto nativo Android (Gradle)
 ├── public/                     # Recursos estáticos
+│   └── exercises/              # Renders de máquinas (WebP, fondo transparente)
 ├── src/
 │   ├── app/
 │   │   ├── core/
