@@ -8,6 +8,7 @@ export const EXERCISES: readonly Exercise[] = [
   { id: 'core-hollow', name: 'Hollow hold', group: 'CORE' },
   { id: 'core-contractora', name: 'Aperturas en contractora', group: 'CORE', image: '/exercises/butterfly.webp' },
   { id: 'core-press-pecho', name: 'Press de pecho en máquina', group: 'CORE', image: '/exercises/chest-press.webp' },
+  { id: 'core-press-banca', name: 'Press de banca plano', group: 'CORE', image: '/exercises/bench-press.webp' },
 
   { id: 'piernas-sentadilla', name: 'Sentadilla con barra', group: 'PIERNAS' },
   { id: 'piernas-prensa', name: 'Prensa de piernas', group: 'PIERNAS' },
