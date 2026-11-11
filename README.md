@@ -26,19 +26,33 @@ Tema visual azul (azul marino profundo → azul vivo, superficies azul claro). T
 | `/configurar/rutinas/:day` | Rutina del día | Chips `L M X J V S D` para cambiar de día; la rutina arranca vacía y se van sumando ejercicios con sus series |
 | `/configurar/rutinas/:day/agregar` | Añadir ejercicios | Catálogo agrupado en **CORE**, **PIERNAS** y **BRAZOS** con selección múltiple; los ya añadidos aparecen deshabilitados |
 | `/entrenar` | Entrenar | Días del plan con sus ejercicios y series, con el día actual preseleccionado y botón **Empezar** |
-| `/entrenar/:day` | Rutina del día | Ejercicios del día agrupados por bloque, con progreso de series registradas y aviso cuando el día está vacío |
+| `/entrenar/:day` | Rutina del día | Ejercicios del día agrupados por bloque, con progreso de series registradas y aviso cuando el día está vacío; **Terminar día** guarda la sesión en el histórico |
 | `/entrenar/:day/:exerciseId` | Registro | Series con check, número, pastilla de kg y pastilla de reps; serie hecha en verde, `‹ ›` para cambiar reps (±1) y kg (±2,5), y `+ Añadir una serie` para series extra |
+| `/progreso` | Progreso | Tira de la semana (número 1–7, foco del día, check si se completó) y una tarjeta por sesión terminada con `kg × reps` de cada ejercicio |
 
 ### Flujo
 
 ```
 Inicio ─┬─ Configurar ─┬─ (sin plan)  Empezar ─ Días ─ Rutina del día ─ Añadir ejercicios ─ Listo
         │               └─ (con plan)  Borrar / Editar días / Editar cada día
-        └─ Entrenar ─ Día ─ Ejercicio ─ Registrar series ─ Guardar
+        ├─ Entrenar ─ Día ─ Ejercicio ─ Registrar series ─ Terminar día ─ (histórico)
+        └─ Progreso ─ semana + sesiones terminadas
 ```
 
 Cada día configurado tiene su propia rutina independiente: añadir o quitar ejercicios en un día no
 afecta a los demás, y un día puede quedar sin ejercicios (la pantalla de entrenamiento lo avisa).
+
+### Progreso
+
+- **Terminar día** toma las series completadas de ese día, las guarda como una **sesión con fecha**
+  (ejercicios + kg/reps de cada serie) y limpia el registro activo para la próxima sesión. Un día sin
+  series completadas no genera sesión.
+- La pantalla `/progreso` muestra la semana actual en siete casillas (`1`–`7`): azul con check si ese
+  día tiene sesión, contorno con mancuerna si está planificado y pendiente, y gris para descanso.
+- Debajo, una tarjeta por sesión terminada con cada ejercicio y sus series como `kg × reps`
+  (los ejercicios a peso corporal se muestran como `reps`).
+- Si no hay histórico, la pantalla siembra **una semana de ejemplo** (semana anterior + lunes y
+  miércoles de esta), marcada como ejemplo, con la acción **Quitar ejemplo**.
 
 ### Persistencia
 
@@ -48,6 +62,8 @@ El MVP no usa backend. El plan semanal y el registro de series se guardan en `lo
 - `rutigym.logs.v2` → series registradas por día y ejercicio; la longitud puede superar las series
   configuradas cuando se añaden series extra en la sesión.
 - `rutigym.last-values.v1` → últimos reps/kg usados por ejercicio, para precargar la próxima sesión.
+- `rutigym.sessions.v1` → sesiones terminadas (fecha, día del plan y snapshot de ejercicios con kg/reps).
+- `rutigym.demo-seeded.v1` → marca de que la semana de ejemplo ya se sembró (o se descartó).
 
 Los valores de una serie no se escriben a mano: arrancan con `10` reps y `20` kg si el ejercicio nunca
 se registró, o con los últimos valores usados de ese ejercicio, y se ajustan con los botones `‹ ›`.
@@ -78,7 +94,8 @@ rutigym/
 │   │   │   ├── config/config-add-exercises.page.*
 │   │   │   ├── train/train.page.*
 │   │   │   ├── train/train-day.page.*
-│   │   │   └── train/exercise-log.page.*
+│   │   │   ├── train/exercise-log.page.*
+│   │   │   └── progress/progress.page.*
 │   │   ├── app.ts / app.html / app.scss
 │   │   ├── app.config.ts
 │   │   └── app.routes.ts
@@ -133,8 +150,9 @@ CHROME_BIN=/usr/bin/google-chrome npm test -- --watch=false --browsers=ChromeHea
 ```
 
 La lógica cubierta es la del estado (`RoutineStore`): formato de días, rutinas independientes por día,
-alta explícita de ejercicios, series por ejercicio, persistencia, borrado de un día o del plan completo
-y progreso por ejercicio y por día.
+alta explícita de ejercicios, series por ejercicio, valores por defecto y series extra, persistencia,
+borrado de un día o del plan completo, progreso por ejercicio y por día, sesiones terminadas y la
+semana de ejemplo del histórico.
 
 ## Sincronización con Capacitor
 
