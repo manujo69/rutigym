@@ -26,6 +26,12 @@
       <span class="bar__fill" [style.width.%]="percent()"></span>
     </span>
 
+    @if (heroImage()) {
+      <figure class="exercise-hero">
+        <img [src]="heroImage()" [alt]="'Máquina: ' + exercise()?.name" />
+      </figure>
+    }
+
     <div class="set-list">
       @for (entry of entries(); track $index; let i = $index) {
         <div class="set" [class.set--done]="entry.done">

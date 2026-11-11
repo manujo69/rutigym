@@ -6,6 +6,8 @@ export interface Exercise {
   readonly id: string;
   readonly name: string;
   readonly group: ExerciseGroup;
+  /** Machine illustration served from `public/exercises/`. Omitted when there is no photo. */
+  readonly image?: string;
 }
 
 export interface PlannedExercise {

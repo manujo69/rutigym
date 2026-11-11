@@ -11,10 +11,10 @@ export const EXERCISES: readonly Exercise[] = [
   { id: 'piernas-prensa', name: 'Prensa de piernas', group: 'PIERNAS' },
   { id: 'piernas-zancadas', name: 'Zancadas con mancuernas', group: 'PIERNAS' },
   { id: 'piernas-peso-muerto', name: 'Peso muerto rumano', group: 'PIERNAS' },
-  { id: 'piernas-extension', name: 'Extensión de cuádriceps', group: 'PIERNAS' },
+  { id: 'piernas-extension', name: 'Extensión de cuádriceps', group: 'PIERNAS', image: '/exercises/leg-extension.webp' },
   { id: 'piernas-curl-femoral', name: 'Curl femoral tumbado', group: 'PIERNAS' },
 
-  { id: 'brazos-curl-barra', name: 'Curl de bíceps con barra', group: 'BRAZOS' },
+  { id: 'brazos-curl-barra', name: 'Curl de bíceps con barra', group: 'BRAZOS', image: '/exercises/preacher-curl.webp' },
   { id: 'brazos-curl-martillo', name: 'Curl martillo', group: 'BRAZOS' },
   { id: 'brazos-press-frances', name: 'Press francés', group: 'BRAZOS' },
   { id: 'brazos-jalon-triceps', name: 'Jalón de tríceps en polea', group: 'BRAZOS' },
