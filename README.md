@@ -65,6 +65,8 @@ tirones de espalda (jalón al pecho y remo sentado).
   `piernas-abduccion`, `piernas-cadera` y `brazos-curl-barra`: los trece renders disponibles.
 - Los assets se generan con `scripts/prepare-exercise-images.py <origen> <destino>`, que recorta el
   render, limpia el fondo de estudio y exporta el WebP de 720 px sobre blanco.
+- El catálogo tiene 31 ejercicios; 13 tienen render y el resto se muestran sin imagen (la tarjeta
+  simplemente no aparece).
 
 ### Progreso
 - **Terminar día** toma las series completadas de ese día, las guarda como una **sesión con fecha**
