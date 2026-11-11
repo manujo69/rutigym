@@ -63,9 +63,10 @@
 .set {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-height: 58px;
-  padding: 12px 14px;
+  padding: 10px 12px;
+  overflow: hidden;
   border: 1.5px solid var(--line);
   border-radius: 20px;
   background: var(--surface);
@@ -77,6 +78,9 @@
 }
 
 .set--done {
+  /* La serie activa gana ancho ocupando el padding lateral de la página. */
+  margin-inline: -14px;
+  padding-inline: 16px;
   border-color: transparent;
   background: linear-gradient(120deg, #4aa95a, #3a9a4a);
   color: #fff;
@@ -116,10 +120,9 @@
 }
 
 .set__index {
-  width: 18px;
   flex: 0 0 auto;
-  margin-right: auto;
-  font-size: 19px;
+  min-width: 12px;
+  font-size: 18px;
   font-weight: 800;
   line-height: 1;
   text-align: center;
@@ -128,15 +131,19 @@
 .set__field {
   display: flex;
   align-items: center;
-  gap: 5px;
-  flex: 0 0 auto;
+  gap: 3px;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .set__pill {
   display: flex;
   align-items: center;
-  gap: 1px;
-  padding: 3px 4px;
+  justify-content: center;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 3px 2px;
   border-radius: 999px;
   background: #eef1f6;
   transition: background 0.18s ease;
@@ -147,16 +154,18 @@
 }
 
 .set__arrow {
-  width: 24px;
-  height: 34px;
+  width: 30px;
+  padding: 0;
+  height: 40px;
+  flex: 0 0 auto;
   border: 0;
   border-radius: 999px;
   background: transparent;
   color: inherit;
-  font-size: 19px;
-  font-weight: 800;
+  font-size: 32px;
+  font-weight: 900;
   line-height: 1;
-  opacity: 0.55;
+  opacity: 0.8;
   cursor: pointer;
   transition: opacity 0.14s ease;
 }
@@ -167,8 +176,10 @@
 }
 
 .set__value {
-  min-width: 36px;
-  font-size: 17px;
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 0 1px;
+  font-size: clamp(15px, 4.3vw, 18px);
   font-weight: 800;
   line-height: 1;
   text-align: center;
@@ -177,7 +188,8 @@
 }
 
 .set__unit {
-  font-size: 9.5px;
+  flex: 0 0 auto;
+  font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -217,4 +229,10 @@
   font-size: 18px;
   font-weight: 700;
   line-height: 1;
+}
+
+@media (max-width: 359px) {
+  .set__unit {
+    display: none;
+  }
 }

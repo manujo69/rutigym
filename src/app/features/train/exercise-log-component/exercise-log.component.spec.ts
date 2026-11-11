@@ -84,4 +84,32 @@ describe('ExerciseLogComponent', () => {
 
     expect(navigate).toHaveBeenCalledWith(['/entrenar', 'mon', 'brazos-curl-barra']);
   });
+
+  it('fits every series row in a narrow viewport without horizontal overflow', () => {
+    build();
+
+    const host = fixture.nativeElement as HTMLElement;
+    host.style.display = 'block';
+
+    // La serie activa (hecha) sobresale del padding: también tiene que entrar en la pantalla.
+    (host.querySelector('.set__check') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    for (const width of ['360px', '412px']) {
+      host.style.width = width;
+      fixture.detectChanges();
+
+      const rows = [...host.querySelectorAll('.set')] as HTMLElement[];
+
+      expect(rows.length).toBeGreaterThan(0);
+      for (const row of rows) {
+        expect(row.scrollWidth)
+          .withContext(`${width}: la fila de series desborda`)
+          .toBeLessThanOrEqual(row.clientWidth + 1);
+      }
+      expect(host.scrollWidth)
+        .withContext(`${width}: la página desborda a lo ancho`)
+        .toBeLessThanOrEqual(host.clientWidth + 1);
+    }
+  });
 });
