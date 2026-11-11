@@ -54,8 +54,9 @@ export class ConfigDaysPage {
     if (!this.ready()) {
       return;
     }
-    this.store.setDraftDays(this.selected());
-    void this.router.navigate(['/configurar/ejercicios']);
+    const days = sortDays(this.selected());
+    this.store.savePlan(days);
+    void this.router.navigate(['/configurar/rutinas', days[0]]);
   }
 
   private initialCount(): number {

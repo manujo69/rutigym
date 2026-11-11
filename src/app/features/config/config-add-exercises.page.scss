@@ -1,0 +1,88 @@
+.topbar__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.picker__hint {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.picker__group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pick-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease,
+    transform 0.16s ease;
+}
+
+.pick-row:hover:not([disabled]) {
+  border-color: var(--blue-300);
+}
+
+.pick-row:active:not([disabled]) {
+  transform: scale(0.99);
+}
+
+.pick-row--on {
+  border-color: var(--blue-450);
+  background: linear-gradient(120deg, #f1f5ff, #ffffff 70%);
+}
+
+.pick-row--added {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.pick-row__box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  border: 2px solid var(--blue-200);
+  border-radius: 8px;
+  background: #fff;
+  color: #fff;
+}
+
+.pick-row__box svg {
+  width: 14px;
+  height: 14px;
+}
+
+.pick-row--on .pick-row__box {
+  border-color: var(--blue-500);
+  background: var(--blue-500);
+}
+
+.pick-row--added .pick-row__box {
+  border-color: var(--teal);
+  background: var(--teal);
+}
+
+.pick-row__name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}

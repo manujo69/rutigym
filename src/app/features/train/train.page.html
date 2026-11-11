@@ -27,7 +27,12 @@
           <span class="day-row__body">
             <span class="day-row__name">{{ selection.label }}</span>
             <span class="day-row__meta">
-              {{ selection.totalSeries }} series · {{ selection.doneSeries }} registradas
+              @if (selection.exercises === 0) {
+                Sin ejercicios
+              } @else {
+                {{ selection.exercises }} ejercicios · {{ selection.totalSeries }} series ·
+                {{ selection.doneSeries }} registradas
+              }
             </span>
           </span>
           @if (today === selection.day) {

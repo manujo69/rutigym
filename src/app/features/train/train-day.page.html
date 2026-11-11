@@ -17,6 +17,14 @@
       <p class="muted">Ese día no forma parte de tu plan semanal.</p>
       <a class="btn btn--primary btn--sm" routerLink="/entrenar">Elegir otro día</a>
     </div>
+  } @else if (plannedCount() === 0) {
+    <div class="empty-state">
+      <p class="empty-state__title">Sin ejercicios para este día</p>
+      <p class="muted">Añade ejercicios a la rutina de {{ dayLabel() }} desde Configuración.</p>
+      <a class="btn btn--primary btn--sm" [routerLink]="['/configurar/rutinas', day()]">
+        Configurar rutina
+      </a>
+    </div>
   } @else {
     <div class="card card--dark day-progress">
       <div class="day-progress__top">
@@ -27,7 +35,7 @@
           <span class="eyebrow day-progress__eyebrow">Series completadas</span>
           <p class="day-progress__count">{{ progress().done }} / {{ progress().total }}</p>
           <p class="day-progress__hint">
-            {{ sections().length }} grupos · {{ store.plannedExercises().length }} ejercicios
+            {{ sections().length }} grupos · {{ plannedCount() }} ejercicios
           </p>
         </div>
       </div>

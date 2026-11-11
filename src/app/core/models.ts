@@ -15,7 +15,8 @@ export interface PlannedExercise {
 
 export interface TrainingPlan {
   readonly days: readonly DayKey[];
-  readonly exercises: readonly PlannedExercise[];
+  /** One independent, ordered routine per day. Days outside the plan may keep their stored routine. */
+  readonly routines: Readonly<Partial<Record<DayKey, readonly PlannedExercise[]>>>;
   readonly updatedAt: string;
 }
 

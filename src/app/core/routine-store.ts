@@ -1,6 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
 
-import { EXERCISES, exerciseById } from './exercise-catalog';
+import { exerciseById } from './exercise-catalog';
 import {
   DEFAULT_SERIES,
   DAY_ORDER,
@@ -18,7 +18,7 @@ import {
   todayKey,
 } from './models';
 
-const PLAN_STORAGE_KEY = 'rutigym.plan.v1';
+const PLAN_STORAGE_KEY = 'rutigym.plan.v2';
 const LOGS_STORAGE_KEY = 'rutigym.logs.v1';
 
 function readFromStorage<T>(key: string): T | null {
@@ -52,13 +52,14 @@ export interface GroupedExercises {
 export interface DaySelection {
   readonly day: DayKey;
   readonly label: string;
+  readonly exercises: number;
   readonly totalSeries: number;
   readonly doneSeries: number;
 }
 
 /**
- * Single source of truth for the configured weekly plan and the per-day workout log.
- * State is signal based and mirrored into `localStorage` so the MVP survives a reload.
+ * Single source of truth for the weekly plan — one independent routine per day — and the
+ * per-day workout log. Signal based, mirrored into `localStorage` so the MVP survives a reload.
  */
 @Injectable({ providedIn: 'root' })
 export class RoutineStore {
@@ -73,13 +74,17 @@ export class RoutineStore {
   });
   readonly days = computed<readonly DayKey[]>(() => this.planState()?.days ?? []);
   readonly daysLabel = computed(() => formatDays(this.days()));
-  readonly plannedExercises = computed<readonly PlannedExercise[]>(
-    () => this.planState()?.exercises ?? [],
+  readonly today = computed(() => todayKey());
+  readonly totalExercises = computed(() =>
+    this.days().reduce((total, day) => total + this.routinesFor(day).length, 0),
   );
   readonly totalSeries = computed(() =>
-    this.plannedExercises().reduce((total, item) => total + item.series, 0),
+    this.days().reduce(
+      (total, day) =>
+        total + this.routinesFor(day).reduce((sum, item) => sum + item.series, 0),
+      0,
+    ),
   );
-  readonly today = computed(() => todayKey());
 
   /** Days picked in the setup flow before the plan is saved. */
   readonly draftDays = this.draftDaysState.asReadonly();
@@ -88,19 +93,57 @@ export class RoutineStore {
     this.draftDaysState.set(days ? sortDays(days) : null);
   }
 
-  seriesFor(exerciseId: string): number {
-    const planned = this.plannedExercises().find((item) => item.exerciseId === exerciseId);
-    return planned?.series ?? DEFAULT_SERIES;
+  /** Every configured day starts with an empty routine. */
+  routinesFor(day: DayKey): readonly PlannedExercise[] {
+    return this.planState()?.routines?.[day] ?? [];
   }
 
-  groupedExercises(): GroupedExercises[] {
+  isPlanned(day: DayKey, exerciseId: string): boolean {
+    return this.routinesFor(day).some((item) => item.exerciseId === exerciseId);
+  }
+
+  /** Configured series for that exercise on that day, or 0 when it is not part of the routine. */
+  seriesFor(day: DayKey, exerciseId: string): number {
+    return this.routinesFor(day).find((item) => item.exerciseId === exerciseId)?.series ?? 0;
+  }
+
+  addExercise(day: DayKey, exerciseId: string, series: number = DEFAULT_SERIES): void {
+    if (!this.planState() || !exerciseById(exerciseId) || this.isPlanned(day, exerciseId)) {
+      return;
+    }
+    this.updateRoutine(day, [...this.routinesFor(day), { exerciseId, series: clampSeries(series) }]);
+  }
+
+  setSeries(day: DayKey, exerciseId: string, series: number): void {
+    if (!this.isPlanned(day, exerciseId)) {
+      return;
+    }
+    this.updateRoutine(
+      day,
+      this.routinesFor(day).map((item) =>
+        item.exerciseId === exerciseId ? { ...item, series: clampSeries(series) } : item,
+      ),
+    );
+  }
+
+  removeExercise(day: DayKey, exerciseId: string): void {
+    this.updateRoutine(
+      day,
+      this.routinesFor(day).filter((item) => item.exerciseId !== exerciseId),
+    );
+  }
+
+  clearDayRoutine(day: DayKey): void {
+    this.updateRoutine(day, []);
+  }
+
+  groupedExercises(day: DayKey): GroupedExercises[] {
     const groups: ExerciseGroup[] = ['CORE', 'PIERNAS', 'BRAZOS'];
+    const routine = this.routinesFor(day);
     return groups
       .map((group) => ({
         group,
-        exercises: this.plannedExercises().filter(
-          (item) => exerciseById(item.exerciseId)?.group === group,
-        ),
+        exercises: routine.filter((item) => exerciseById(item.exerciseId)?.group === group),
       }))
       .filter((section) => section.exercises.length > 0);
   }
@@ -109,20 +152,19 @@ export class RoutineStore {
     return exerciseById(planned.exerciseId);
   }
 
-  /** Saves the weekly plan; series defaults to the current value or 3. */
-  savePlan(days: readonly DayKey[], series: Readonly<Record<string, number>>): void {
-    const plan: TrainingPlan = {
-      days: sortDays(days.filter((day) => DAY_ORDER.includes(day))),
-      exercises: EXERCISES.map((exercise) => ({
-        exerciseId: exercise.id,
-        series: clampSeries(series[exercise.id] ?? DEFAULT_SERIES),
-      })),
-      updatedAt: new Date().toISOString(),
+  /** Saves the configured days; routines of days that stay in the plan are preserved. */
+  savePlan(days: readonly DayKey[]): void {
+    const previous = this.planState();
+    const routines: Partial<Record<DayKey, readonly PlannedExercise[]>> = {
+      ...(previous?.routines ?? {}),
     };
+    const keep = sortDays(days.filter((day) => DAY_ORDER.includes(day)));
+    for (const day of keep) {
+      routines[day] ??= [];
+    }
 
-    this.planState.set(plan);
+    this.persistPlan({ days: keep, routines, updatedAt: new Date().toISOString() });
     this.draftDaysState.set(null);
-    writeToStorage(PLAN_STORAGE_KEY, plan);
   }
 
   clearPlan(): void {
@@ -139,8 +181,9 @@ export class RoutineStore {
 
   /** One entry per configured series, seeded from what the user already logged. */
   setsFor(day: DayKey, exerciseId: string): SetEntry[] {
-    const total = Math.min(MAX_SERIES, Math.max(1, this.seriesFor(exerciseId)));
     const stored = this.logsState()[day]?.[exerciseId] ?? [];
+    // Falls back to the logged length so history survives clearing the routine (BORRAR).
+    const total = Math.min(MAX_SERIES, Math.max(0, this.seriesFor(day, exerciseId) || stored.length));
     return Array.from({ length: total }, (_, index) => {
       const entry = stored[index];
       return {
@@ -166,7 +209,7 @@ export class RoutineStore {
   }
 
   dayProgressFor(day: DayKey): { done: number; total: number } {
-    return this.plannedExercises().reduce(
+    return this.routinesFor(day).reduce(
       (acc, item) => {
         const progress = this.progressFor(day, item.exerciseId);
         return { done: acc.done + progress.done, total: acc.total + progress.total };
@@ -182,6 +225,7 @@ export class RoutineStore {
       return {
         day,
         label: formatDays([day]),
+        exercises: this.routinesFor(day).length,
         totalSeries: progress.total,
         doneSeries: progress.done,
       };
@@ -197,19 +241,46 @@ export class RoutineStore {
     return this.days().includes(current) ? current : this.days()[0];
   }
 
+  private updateRoutine(day: DayKey, routine: readonly PlannedExercise[]): void {
+    const plan = this.planState();
+    if (!plan) {
+      return;
+    }
+    this.persistPlan({
+      days: plan.days,
+      routines: { ...plan.routines, [day]: routine.map((item) => ({ ...item })) },
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  private persistPlan(plan: TrainingPlan): void {
+    this.planState.set(plan);
+    writeToStorage(PLAN_STORAGE_KEY, plan);
+  }
+
   private readPlan(): TrainingPlan | null {
     const stored = readFromStorage<TrainingPlan>(PLAN_STORAGE_KEY);
     if (!stored || !Array.isArray(stored.days) || stored.days.length === 0) {
       return null;
     }
+
+    const routines: Partial<Record<DayKey, readonly PlannedExercise[]>> = {};
+    const storedRoutines = (stored.routines ?? {}) as Record<
+      string,
+      readonly PlannedExercise[] | undefined
+    >;
+    for (const [day, routine] of Object.entries(storedRoutines)) {
+      if (!DAY_ORDER.includes(day as DayKey) || !Array.isArray(routine)) {
+        continue;
+      }
+      routines[day as DayKey] = routine
+        .filter((item) => !!exerciseById(item.exerciseId))
+        .map((item) => ({ exerciseId: item.exerciseId, series: clampSeries(Number(item.series)) }));
+    }
+
     return {
       days: sortDays(stored.days.filter((day) => DAY_ORDER.includes(day))),
-      exercises: Array.isArray(stored.exercises)
-        ? stored.exercises.map((item) => ({
-            exerciseId: item.exerciseId,
-            series: clampSeries(Number(item.series)),
-          }))
-        : [],
+      routines,
       updatedAt: stored.updatedAt ?? new Date().toISOString(),
     };
   }

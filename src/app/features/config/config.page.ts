@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { GROUP_ORDER, exercisesOfGroup } from '../../core/exercise-catalog';
+import { DAY_LABELS } from '../../core/models';
 import { RoutineStore } from '../../core/routine-store';
 
 @Component({
@@ -12,10 +12,9 @@ import { RoutineStore } from '../../core/routine-store';
 })
 export class ConfigPage {
   protected readonly store = inject(RoutineStore);
+  protected readonly labels = DAY_LABELS;
   protected readonly confirmingDelete = signal(false);
-  protected readonly sections = computed(() =>
-    GROUP_ORDER.map((group) => ({ group, count: exercisesOfGroup(group).length })),
-  );
+  protected readonly selections = computed(() => this.store.daySelections());
 
   protected clearPlan(): void {
     this.store.clearPlan();

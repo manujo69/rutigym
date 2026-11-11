@@ -11,10 +11,10 @@
     </div>
   </header>
 
-  @if (!dayKey() || !exercise()) {
+  @if (!dayKey() || !exercise() || !planned()) {
     <div class="empty-state">
       <p class="empty-state__title">Ejercicio no válido</p>
-      <p class="muted">El ejercicio no pertenece a tu rutina configurada.</p>
+      <p class="muted">El ejercicio no forma parte de la rutina de ese día.</p>
       <a class="btn btn--primary btn--sm" routerLink="/entrenar">Volver a entrenar</a>
     </div>
   } @else {

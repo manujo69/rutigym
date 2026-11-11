@@ -26,7 +26,7 @@
         <span class="home__plan-label">Tu plan</span>
         <p class="home__plan-days">{{ store.daysLabel() }}</p>
         <p class="home__plan-meta">
-          {{ store.plannedExercises().length }} ejercicios · {{ store.totalSeries() }} series por sesión
+          {{ store.totalExercises() }} ejercicios · {{ store.totalSeries() }} series por semana
         </p>
       } @else {
         <span class="home__plan-label">Sin rutina</span>

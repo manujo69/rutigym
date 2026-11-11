@@ -32,6 +32,10 @@ export class ExerciseLogPage implements OnInit {
     return DAY_ORDER.includes(value) ? value : null;
   });
   protected readonly exercise = computed(() => exerciseById(this.exerciseId()));
+  protected readonly planned = computed(() => {
+    const day = this.dayKey();
+    return !!day && this.store.isPlanned(day, this.exerciseId());
+  });
   protected readonly entries = signal<readonly SetEntry[]>([]);
   protected readonly doneCount = computed(
     () => this.entries().filter((entry) => entry.done).length,

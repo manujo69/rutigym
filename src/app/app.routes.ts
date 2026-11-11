@@ -17,10 +17,15 @@ export const routes: Routes = [
     loadComponent: () => import('./features/config/config-days.page').then((m) => m.ConfigDaysPage),
   },
   {
-    path: 'configurar/ejercicios',
-    title: 'Ejercicios · Rutigym',
+    path: 'configurar/rutinas/:day',
+    title: 'Rutina del día · Rutigym',
+    loadComponent: () => import('./features/config/config-day.page').then((m) => m.ConfigDayPage),
+  },
+  {
+    path: 'configurar/rutinas/:day/agregar',
+    title: 'Añadir ejercicios · Rutigym',
     loadComponent: () =>
-      import('./features/config/config-exercises.page').then((m) => m.ConfigExercisesPage),
+      import('./features/config/config-add-exercises.page').then((m) => m.ConfigAddExercisesPage),
   },
   {
     path: 'entrenar',

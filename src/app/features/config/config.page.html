@@ -14,8 +14,8 @@
     @if (store.hasPlan()) {
       <p class="config__days">{{ store.daysLabel() }}</p>
       <p class="muted">
-        {{ store.days().length }} días · {{ store.plannedExercises().length }} ejercicios ·
-        {{ store.totalSeries() }} series por sesión
+        {{ store.days().length }} días · {{ store.totalExercises() }} ejercicios ·
+        {{ store.totalSeries() }} series por semana
       </p>
 
       @if (confirmingDelete()) {
@@ -39,23 +39,36 @@
       }
     } @else {
       <p class="config__days config__days--empty">Sin configurar</p>
-      <p class="muted">Elige cuántos días entrenas y las series de cada ejercicio.</p>
+      <p class="muted">Elige cuántos días entrenas y añade los ejercicios de cada día.</p>
       <a class="btn btn--primary" routerLink="/configurar/dias">Empezar</a>
     }
   </div>
 
   @if (store.hasPlan()) {
-    <div class="card card--soft">
-      <span class="eyebrow">Ejercicios por grupo</span>
-      <div class="config__groups">
-        @for (section of sections(); track section.group) {
-          <div class="config__group">
-            <span class="config__group-name">{{ section.group }}</span>
-            <span class="config__group-count">{{ section.count }} ejercicios</span>
-          </div>
+    <div class="config__routines">
+      <div class="config__routines-head">
+        <span class="eyebrow">Rutinas por día</span>
+        <a class="btn--link" routerLink="/configurar/dias">Editar días</a>
+      </div>
+
+      <div class="list">
+        @for (selection of selections(); track selection.day) {
+          <a class="day-row" [routerLink]="['/configurar/rutinas', selection.day]">
+            <span class="day-row__letter">{{ labels[selection.day].letter }}</span>
+            <span class="day-row__body">
+              <span class="day-row__name">{{ selection.label }}</span>
+              <span class="day-row__meta">
+                @if (selection.exercises === 0) {
+                  Sin ejercicios
+                } @else {
+                  {{ selection.exercises }} ejercicios · {{ selection.totalSeries }} series
+                }
+              </span>
+            </span>
+            <span class="chevron" aria-hidden="true">›</span>
+          </a>
         }
       </div>
-      <a class="btn btn--outline" routerLink="/configurar/ejercicios">Editar ejercicios</a>
     </div>
   } @else {
     <div class="config__note">
@@ -63,7 +76,7 @@
       <ol class="config__steps">
         <li>Elige cuántos días quieres entrenar.</li>
         <li>Marca los días de la semana.</li>
-        <li>Ajusta las series de cada ejercicio.</li>
+        <li>Añade los ejercicios de cada día y sus series.</li>
       </ol>
     </div>
   }

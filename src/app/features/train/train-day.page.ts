@@ -47,13 +47,14 @@ export class TrainDayPage {
   });
   protected readonly sections = computed<ExerciseSection[]>(() => {
     const key = this.dayKey();
-    return this.store.groupedExercises().map((section) => ({
+    if (!key) {
+      return [];
+    }
+    return this.store.groupedExercises(key).map((section) => ({
       group: section.group,
       exercises: section.exercises.map((planned) => {
         const exercise = exerciseById(planned.exerciseId);
-        const progress = key
-          ? this.store.progressFor(key, planned.exerciseId)
-          : { done: 0, total: planned.series };
+        const progress = this.store.progressFor(key, planned.exerciseId);
         return {
           id: planned.exerciseId,
           name: exercise?.name ?? planned.exerciseId,
@@ -62,6 +63,10 @@ export class TrainDayPage {
         };
       }),
     }));
+  });
+  protected readonly plannedCount = computed(() => {
+    const key = this.dayKey();
+    return key ? this.store.routinesFor(key).length : 0;
   });
 
   protected open(exerciseId: string): void {

@@ -1,0 +1,101 @@
+<section class="page">
+  <header class="topbar">
+    <a class="icon-button" routerLink="/configurar" aria-label="Volver a configuración">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </a>
+    <h1 class="topbar__title">Rutinas por día</h1>
+  </header>
+
+  @if (!configured()) {
+    <div class="empty-state">
+      <p class="empty-state__title">Día no configurado</p>
+      <p class="muted">Ese día no forma parte de tu plan semanal.</p>
+      <a class="btn btn--primary btn--sm" routerLink="/configurar/dias">Editar días</a>
+    </div>
+  } @else {
+    <div class="day-chips">
+      @for (chip of chips(); track chip) {
+        <a
+          class="day-chips__item"
+          [class.day-chips__item--on]="chip === dayKey()"
+          [routerLink]="['/configurar/rutinas', chip]"
+          [attr.aria-label]="labels[chip].long"
+          [attr.aria-current]="chip === dayKey() ? 'true' : null"
+        >
+          {{ labels[chip].letter }}
+        </a>
+      }
+    </div>
+
+    <div class="day-editor__head">
+      <h2 class="section-title">{{ dayLabel() }}</h2>
+      <p class="muted">
+        @if (rows().length === 0) {
+          Todavía sin ejercicios
+        } @else {
+          {{ rows().length }} ejercicios · {{ totalSeries() }} series
+        }
+      </p>
+    </div>
+
+    @if (rows().length === 0) {
+      <div class="empty-state">
+        <p class="empty-state__title">Esta rutina está vacía</p>
+        <p class="muted">Añade los ejercicios que quieras hacer este día.</p>
+        <button type="button" class="btn btn--primary btn--sm" (click)="addExercises()">
+          Añadir ejercicio
+        </button>
+      </div>
+    } @else {
+      <div class="list">
+        @for (row of rows(); track row.id) {
+          <div class="exercise">
+            <span class="exercise__body">
+              <span class="exercise__name">{{ row.name }}</span>
+              <span class="exercise__group">{{ row.group }}</span>
+            </span>
+            <div class="stepper">
+              <button
+                type="button"
+                class="stepper__btn"
+                [disabled]="row.series <= 1"
+                (click)="adjust(row.id, -1)"
+                [attr.aria-label]="'Quitar una serie a ' + row.name"
+              >
+                −
+              </button>
+              <span class="stepper__count">{{ row.series }}</span>
+              <button
+                type="button"
+                class="stepper__btn"
+                [disabled]="row.series >= 10"
+                (click)="adjust(row.id, 1)"
+                [attr.aria-label]="'Añadir una serie a ' + row.name"
+              >
+                +
+              </button>
+            </div>
+            <button
+              type="button"
+              class="exercise__remove"
+              (click)="remove(row.id)"
+              [attr.aria-label]="'Quitar ' + row.name"
+            >
+              ×
+            </button>
+          </div>
+        }
+      </div>
+
+      <button type="button" class="btn btn--outline" (click)="addExercises()">
+        Añadir ejercicio
+      </button>
+    }
+
+    <div class="sticky-actions">
+      <a class="btn btn--primary" routerLink="/configurar">Listo</a>
+    </div>
+  }
+</section>
