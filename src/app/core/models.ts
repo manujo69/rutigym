@@ -1,6 +1,6 @@
 export type DayKey = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
-export type ExerciseGroup = 'CORE' | 'PIERNAS' | 'BRAZOS';
+export type ExerciseGroup = 'CORE' | 'PIERNAS' | 'BRAZOS' | 'ESPALDA';
 
 export interface Exercise {
   readonly id: string;

@@ -1,6 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
 
-import { exerciseById } from './exercise-catalog';
+import { GROUP_ORDER, exerciseById } from './exercise-catalog';
 import {
   DAY_LABELS,
   DAY_ORDER,
@@ -159,14 +159,11 @@ export class RoutineStore {
   }
 
   groupedExercises(day: DayKey): GroupedExercises[] {
-    const groups: ExerciseGroup[] = ['CORE', 'PIERNAS', 'BRAZOS'];
     const routine = this.routinesFor(day);
-    return groups
-      .map((group) => ({
-        group,
-        exercises: routine.filter((item) => exerciseById(item.exerciseId)?.group === group),
-      }))
-      .filter((section) => section.exercises.length > 0);
+    return GROUP_ORDER.map((group) => ({
+      group,
+      exercises: routine.filter((item) => exerciseById(item.exerciseId)?.group === group),
+    })).filter((section) => section.exercises.length > 0);
   }
 
   exerciseFor(planned: PlannedExercise): Exercise | undefined {

@@ -22,9 +22,12 @@ export const EXERCISES: readonly Exercise[] = [
   { id: 'brazos-jalon-triceps', name: 'Jalón de tríceps en polea', group: 'BRAZOS' },
   { id: 'brazos-fondos', name: 'Fondos en paralelas', group: 'BRAZOS' },
   { id: 'brazos-press-hombros', name: 'Press de hombros en máquina', group: 'BRAZOS', image: '/exercises/shoulder-press.webp' },
+
+  { id: 'espalda-jalon-pecho', name: 'Jalón al pecho', group: 'ESPALDA', image: '/exercises/lat-pulley.webp' },
+  { id: 'espalda-remo-sentado', name: 'Remo sentado', group: 'ESPALDA', image: '/exercises/seated-row.webp' },
 ];
 
-export const GROUP_ORDER: readonly ExerciseGroup[] = ['CORE', 'PIERNAS', 'BRAZOS'];
+export const GROUP_ORDER: readonly ExerciseGroup[] = ['CORE', 'PIERNAS', 'BRAZOS', 'ESPALDA'];
 
 export function exerciseById(id: string): Exercise | undefined {
   return EXERCISES.find((exercise) => exercise.id === id);
