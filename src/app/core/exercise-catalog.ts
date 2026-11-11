@@ -6,6 +6,8 @@ export const EXERCISES: readonly Exercise[] = [
   { id: 'core-crunch-polea', name: 'Crunch en polea alta', group: 'CORE' },
   { id: 'core-rueda', name: 'Rueda abdominal', group: 'CORE' },
   { id: 'core-hollow', name: 'Hollow hold', group: 'CORE' },
+  { id: 'core-contractora', name: 'Aperturas en contractora', group: 'CORE', image: '/exercises/butterfly.webp' },
+  { id: 'core-press-pecho', name: 'Press de pecho en máquina', group: 'CORE', image: '/exercises/chest-press.webp' },
 
   { id: 'piernas-sentadilla', name: 'Sentadilla con barra', group: 'PIERNAS' },
   { id: 'piernas-prensa', name: 'Prensa de piernas', group: 'PIERNAS' },
@@ -19,6 +21,7 @@ export const EXERCISES: readonly Exercise[] = [
   { id: 'brazos-press-frances', name: 'Press francés', group: 'BRAZOS' },
   { id: 'brazos-jalon-triceps', name: 'Jalón de tríceps en polea', group: 'BRAZOS' },
   { id: 'brazos-fondos', name: 'Fondos en paralelas', group: 'BRAZOS' },
+  { id: 'brazos-press-hombros', name: 'Press de hombros en máquina', group: 'BRAZOS', image: '/exercises/shoulder-press.webp' },
 ];
 
 export const GROUP_ORDER: readonly ExerciseGroup[] = ['CORE', 'PIERNAS', 'BRAZOS'];
