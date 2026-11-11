@@ -17,6 +17,7 @@ export const EXERCISES: readonly Exercise[] = [
   { id: 'piernas-extension', name: 'Extensión de cuádriceps', group: 'PIERNAS', image: '/exercises/leg-extension.webp' },
   { id: 'piernas-curl-femoral', name: 'Curl femoral tumbado', group: 'PIERNAS' },
   { id: 'piernas-abduccion', name: 'Abducción de cadera en máquina', group: 'PIERNAS', image: '/exercises/hip-abduction.webp' },
+  { id: 'piernas-cadera', name: 'Extensión de cadera en máquina', group: 'PIERNAS', image: '/exercises/hip-extension.webp' },
 
   { id: 'brazos-curl-barra', name: 'Curl de bíceps con barra', group: 'BRAZOS', image: '/exercises/preacher-curl.webp' },
   { id: 'brazos-curl-martillo', name: 'Curl martillo', group: 'BRAZOS' },
