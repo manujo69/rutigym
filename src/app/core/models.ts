@@ -36,6 +36,32 @@ export type ExerciseLogs = Readonly<Record<string, readonly SetEntry[]>>;
 
 export type SessionLogs = Readonly<Partial<Record<DayKey, ExerciseLogs>>>;
 
+/** A finished workout: the snapshot of an exercise with the values of every series. */
+export interface SessionExercise {
+  readonly exerciseId: string;
+  readonly sets: readonly SetEntry[];
+}
+
+export interface WorkoutSession {
+  readonly id: string;
+  /** Local calendar date, `YYYY-MM-DD`. */
+  readonly date: string;
+  readonly day: DayKey;
+  readonly exercises: readonly SessionExercise[];
+  /** Seeded demo data, safe to delete. */
+  readonly demo?: boolean;
+}
+
+export type WeekDayState = 'done' | 'planned' | 'rest';
+
+export interface WeekDay {
+  readonly date: string;
+  readonly day: DayKey;
+  readonly number: number;
+  readonly label: string;
+  readonly state: WeekDayState;
+}
+
 export const DAY_ORDER: readonly DayKey[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
 export const DAY_LABELS: Readonly<Record<DayKey, { letter: string; long: string }>> = {
@@ -101,4 +127,45 @@ export function clampKg(value: number): number {
     return DEFAULT_KG;
   }
   return Math.min(MAX_KG, Math.max(0, Math.round(value * 10) / 10));
+}
+
+/** Local calendar date as `YYYY-MM-DD` (no UTC drift). */
+export function toIsoDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function parseIsoDate(value: string): Date {
+  const [year, month, day] = value.split('-').map(Number);
+  return new Date(year, (month ?? 1) - 1, day ?? 1);
+}
+
+export function addDays(date: Date, days: number): Date {
+  const next = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+/** Monday of the week that contains `date`. */
+export function startOfWeek(date: Date): Date {
+  const offset = (date.getDay() + 6) % 7;
+  return addDays(date, -offset);
+}
+
+/** `2026-11-11` → `MIÉ 11 NOV`. */
+export function formatSessionDate(isoDate: string): string {
+  const date = parseIsoDate(isoDate);
+  const formatted = new Intl.DateTimeFormat('es-ES', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  }).format(date);
+  return formatted.replace(/\./g, '').toUpperCase();
+}
+
+/** `80` → `80`, `82.5` → `82,5`. */
+export function formatKg(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1).replace('.', ',');
 }

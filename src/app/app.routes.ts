@@ -28,6 +28,12 @@ export const routes: Routes = [
       import('./features/config/config-add-exercises.page').then((m) => m.ConfigAddExercisesPage),
   },
   {
+    path: 'progreso',
+    title: 'Progreso · Rutigym',
+    loadComponent: () =>
+      import('./features/progress/progress.page').then((m) => m.ProgressPage),
+  },
+  {
     path: 'entrenar',
     title: 'Entrenar · Rutigym',
     loadComponent: () => import('./features/train/train.page').then((m) => m.TrainPage),

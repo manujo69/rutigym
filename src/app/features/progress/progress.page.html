@@ -1,0 +1,104 @@
+<section class="page">
+  <header class="topbar">
+    <a class="icon-button" routerLink="/" aria-label="Volver al inicio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </a>
+    <h1 class="topbar__title">Progreso</h1>
+  </header>
+
+  <div class="progress__head">
+    <h2 class="section-title">Tu semana</h2>
+    <p class="muted">
+      {{ weekRange() }} · {{ weekDone() }} de {{ weekPlanned() }} sesiones completadas
+    </p>
+  </div>
+
+  <div class="week">
+    @for (day of week(); track day.day) {
+      <div
+        class="week__tile"
+        [class.week__tile--done]="day.state === 'done'"
+        [class.week__tile--rest]="day.state === 'rest'"
+      >
+        <span class="week__number">{{ day.number }}</span>
+        <span class="week__label">{{ day.label }}</span>
+
+        @switch (day.state) {
+          @case ('done') {
+            <span class="week__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+            </span>
+          }
+          @case ('planned') {
+            <span class="week__icon week__icon--planned" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                <path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10" />
+              </svg>
+            </span>
+          }
+          @default {
+            <span class="week__icon week__icon--rest" aria-hidden="true">–</span>
+          }
+        }
+      </div>
+    }
+  </div>
+
+  @if (hasDemo()) {
+    <div class="progress__demo">
+      <div>
+        <span class="badge">Ejemplo</span>
+        <p class="progress__demo-text">El histórico incluye una semana de ejemplo para ver la pantalla.</p>
+      </div>
+      <button type="button" class="btn--link" (click)="clearDemo()">Quitar ejemplo</button>
+    </div>
+  }
+
+  <div class="progress__list-head">
+    <span class="eyebrow">Sesiones terminadas</span>
+    <span class="progress__count">{{ sessions().length }}</span>
+  </div>
+
+  @if (sessions().length === 0) {
+    <div class="empty-state">
+      <p class="empty-state__title">Todavía sin histórico</p>
+      <p class="muted">Cuando termines un día de entrenamiento vas a verlo acá.</p>
+      <a class="btn btn--primary btn--sm" routerLink="/entrenar">Ir a entrenar</a>
+    </div>
+  } @else {
+    @for (card of sessions(); track card.id) {
+      <article class="session">
+        <header class="session__head">
+          <div class="session__titles">
+            <p class="session__title">{{ card.title }}</p>
+            <p class="session__meta">
+              {{ card.rows.length }} ejercicios · {{ card.series }} series
+              @if (card.isToday) {
+                · hoy
+              }
+            </p>
+          </div>
+          @if (card.demo) {
+            <span class="badge">Ejemplo</span>
+          }
+        </header>
+
+        <ul class="session__rows">
+          @for (row of card.rows; track $index) {
+            <li class="session__row">
+              <div class="session__row-head">
+                <span class="session__name">{{ row.name }}</span>
+                <span class="session__group">{{ row.group }}</span>
+              </div>
+              <span class="session__sets">{{ row.sets }}</span>
+            </li>
+          }
+        </ul>
+      </article>
+    }
+  }
+</section>

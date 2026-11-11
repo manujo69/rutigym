@@ -75,4 +75,14 @@ export class TrainDayPage {
       void this.router.navigate(['/entrenar', key, exerciseId]);
     }
   }
+
+  /** Snapshots the finished day into the history and clears its active log. */
+  protected finishDay(): void {
+    const key = this.dayKey();
+    if (!key) {
+      return;
+    }
+    this.store.finishDay(key);
+    void this.router.navigate(['/entrenar']);
+  }
 }

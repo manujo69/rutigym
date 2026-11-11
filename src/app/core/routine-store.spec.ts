@@ -177,4 +177,98 @@ describe('RoutineStore', () => {
     expect(ids(store.routinesFor('wed'))).toEqual(['piernas-prensa']);
     expect(store.seriesFor('wed', 'piernas-prensa')).toBe(4);
   });
+
+  describe('workout history', () => {
+    const wednesday = new Date(2026, 10, 11);
+
+    it('records a dated session with the weights and reps of every series', () => {
+      store.savePlan(['wed']);
+      store.addExercise('wed', 'piernas-prensa', 2);
+      store.saveSets('wed', 'piernas-prensa', [
+        { reps: 12, kg: 80, done: true },
+        { reps: 10, kg: 85, done: false },
+      ]);
+
+      store.finishDay('wed', wednesday);
+
+      const sessions = store.sessions();
+
+      expect(sessions.length).toBe(1);
+      expect(sessions[0].date).toBe('2026-11-11');
+      expect(sessions[0].day).toBe('wed');
+      expect(sessions[0].exercises).toEqual([
+        {
+          exerciseId: 'piernas-prensa',
+          sets: [
+            { reps: 12, kg: 80, done: true },
+            { reps: 10, kg: 85, done: false },
+          ],
+        },
+      ]);
+    });
+
+    it('does not record a session when nothing was completed', () => {
+      store.savePlan(['wed']);
+      store.addExercise('wed', 'piernas-prensa', 2);
+
+      store.finishDay('wed', wednesday);
+
+      expect(store.sessions()).toEqual([]);
+    });
+
+    it('clears only the active log of the finished day', () => {
+      store.savePlan(['mon', 'wed']);
+      store.addExercise('mon', 'core-plancha', 1);
+      store.addExercise('wed', 'piernas-prensa', 1);
+      store.saveSets('mon', 'core-plancha', [{ reps: 12, kg: 0, done: true }]);
+      store.saveSets('wed', 'piernas-prensa', [{ reps: 10, kg: 70, done: true }]);
+
+      store.finishDay('wed', wednesday);
+
+      expect(store.setsFor('wed', 'piernas-prensa').every((entry) => !entry.done)).toBeTrue();
+      expect(store.setsFor('mon', 'core-plancha').some((entry) => entry.done)).toBeTrue();
+    });
+
+    it('marks completed, planned and rest days of the current week', () => {
+      store.savePlan(['mon', 'wed', 'fri']);
+      store.ensureDemoHistory(wednesday);
+
+      const week = store.weekOverview(wednesday);
+
+      expect(week.map((day) => day.number)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+      expect(week[0].state).toBe('done');
+      expect(week[1].state).toBe('rest');
+      expect(week[2].state).toBe('done');
+      expect(week[4].state).toBe('planned');
+      expect(week[5].state).toBe('rest');
+      expect(week[0].label).toBeTruthy();
+    });
+
+    it('seeds a demo week only when there is no history', () => {
+      store.ensureDemoHistory(wednesday);
+      const seeded = store.sessions();
+
+      expect(seeded.length).toBe(5);
+      expect(seeded.every((session) => session.demo)).toBeTrue();
+
+      store.ensureDemoHistory(wednesday);
+      expect(store.sessions().length).toBe(5);
+    });
+
+    it('removes the demo sessions but keeps real ones', () => {
+      store.ensureDemoHistory(wednesday);
+      store.savePlan(['wed']);
+      store.addExercise('wed', 'piernas-prensa', 1);
+      store.saveSets('wed', 'piernas-prensa', [{ reps: 10, kg: 70, done: true }]);
+      store.finishDay('wed', wednesday);
+
+      store.clearDemoSessions();
+
+      expect(store.sessions().length).toBe(1);
+      expect(store.sessions()[0].demo).toBeFalsy();
+
+      store.ensureDemoHistory(wednesday);
+      expect(store.sessions().length).toBe(1);
+    });
+  });
 });

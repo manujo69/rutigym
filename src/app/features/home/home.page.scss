@@ -136,6 +136,12 @@
   gap: 12px;
 }
 
+.home__secondary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
 .home__footnote {
   margin-top: auto;
   padding-bottom: 4px;
