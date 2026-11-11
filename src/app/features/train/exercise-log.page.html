@@ -18,77 +18,89 @@
       <a class="btn btn--primary btn--sm" routerLink="/entrenar">Volver a entrenar</a>
     </div>
   } @else {
-    <div class="card">
-      <div class="log__summary">
-        <div>
-          <span class="eyebrow">Series completadas</span>
-          <p class="log__count">{{ doneCount() }} / {{ entries().length }}</p>
-        </div>
-        <span class="badge" [class.badge--done]="doneCount() === entries().length && entries().length > 0">
-          {{ percent() }}%
-        </span>
-      </div>
-      <span class="bar">
-        <span class="bar__fill" [style.width.%]="percent()"></span>
-      </span>
+    <div class="log__meta">
+      <span class="log__count">{{ doneCount() }}/{{ entries().length }} Listo</span>
+      <span class="log__percent">{{ percent() }}%</span>
     </div>
+    <span class="bar">
+      <span class="bar__fill" [style.width.%]="percent()"></span>
+    </span>
 
-    <p class="log__hint">Anota repeticiones y kilos por serie, y marca cada serie al terminarla.</p>
-
-    <div class="list">
+    <div class="set-list">
       @for (entry of entries(); track $index; let i = $index) {
         <div class="set" [class.set--done]="entry.done">
-          <div class="set__head">
-            <button
-              type="button"
-              class="set__check"
-              [attr.aria-pressed]="entry.done"
-              [attr.aria-label]="'Marcar serie ' + (i + 1)"
-              (click)="toggleDone(i)"
-            >
-              @if (entry.done) {
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-              }
-            </button>
-            <span class="set__label">Serie {{ i + 1 }}</span>
-            <span class="set__state">{{ entry.done ? 'Hecha' : 'Pendiente' }}</span>
+          <button
+            type="button"
+            class="set__check"
+            [attr.aria-pressed]="entry.done"
+            [attr.aria-label]="'Marcar serie ' + (i + 1)"
+            (click)="toggleDone(i)"
+          >
+            @if (entry.done) {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+            }
+          </button>
+
+          <span class="set__index">{{ i + 1 }}</span>
+
+          <div class="set__field">
+            <div class="set__pill">
+              <button
+                type="button"
+                class="set__arrow"
+                [attr.aria-label]="'Bajar kg en la serie ' + (i + 1)"
+                (click)="adjustKg(i, -1)"
+              >
+                ‹
+              </button>
+              <span class="set__value">{{ formatKg(entry.kg) }}</span>
+              <button
+                type="button"
+                class="set__arrow"
+                [attr.aria-label]="'Subir kg en la serie ' + (i + 1)"
+                (click)="adjustKg(i, 1)"
+              >
+                ›
+              </button>
+            </div>
+            <span class="set__unit">kg</span>
           </div>
 
-          <div class="set__fields">
-            <label class="set__field">
-              <span class="field__label">Reps</span>
-              <input
-                class="field__input"
-                type="number"
-                inputmode="numeric"
-                min="0"
-                placeholder="—"
-                [value]="entry.reps ?? ''"
-                (input)="setReps(i, $event)"
-              />
-            </label>
-            <label class="set__field">
-              <span class="field__label">Kg</span>
-              <input
-                class="field__input"
-                type="number"
-                inputmode="decimal"
-                min="0"
-                step="0.5"
-                placeholder="—"
-                [value]="entry.kg ?? ''"
-                (input)="setKg(i, $event)"
-              />
-            </label>
+          <div class="set__field">
+            <div class="set__pill">
+              <button
+                type="button"
+                class="set__arrow"
+                [attr.aria-label]="'Bajar repeticiones en la serie ' + (i + 1)"
+                (click)="adjustReps(i, -1)"
+              >
+                ‹
+              </button>
+              <span class="set__value">{{ entry.reps }}</span>
+              <button
+                type="button"
+                class="set__arrow"
+                [attr.aria-label]="'Subir repeticiones en la serie ' + (i + 1)"
+                (click)="adjustReps(i, 1)"
+              >
+                ›
+              </button>
+            </div>
+            <span class="set__unit">reps</span>
           </div>
         </div>
       }
     </div>
 
+    <button type="button" class="add-set" (click)="addSeries()">
+      <span class="add-set__icon" aria-hidden="true">+</span>
+      Añadir una serie
+    </button>
+
     <div class="sticky-actions">
-      <button type="button" class="btn btn--primary" (click)="save()">Guardar series</button>
+      <button type="button" class="btn btn--primary" (click)="next()">Siguiente</button>
     </div>
   }
 </section>

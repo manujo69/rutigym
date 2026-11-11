@@ -20,10 +20,16 @@ export interface TrainingPlan {
   readonly updatedAt: string;
 }
 
+/** Values used by a set; one row of the session log. */
 export interface SetEntry {
-  readonly reps: number | null;
-  readonly kg: number | null;
+  readonly reps: number;
+  readonly kg: number;
   readonly done: boolean;
+}
+
+export interface ExerciseValues {
+  readonly reps: number;
+  readonly kg: number;
 }
 
 export type ExerciseLogs = Readonly<Record<string, readonly SetEntry[]>>;
@@ -45,6 +51,14 @@ export const DAY_LABELS: Readonly<Record<DayKey, { letter: string; long: string 
 export const MIN_SERIES = 1;
 export const MAX_SERIES = 10;
 export const DEFAULT_SERIES = 3;
+
+/** Session defaults: used only when the exercise has never been logged. */
+export const DEFAULT_REPS = 10;
+export const DEFAULT_KG = 20;
+export const REPS_STEP = 1;
+export const KG_STEP = 2.5;
+export const MAX_REPS = 999;
+export const MAX_KG = 500;
 
 /** Maps a JavaScript `Date.getDay()` index (0 = Sunday) to a `DayKey`. */
 export function dayKeyFromJsDay(jsDay: number): DayKey {
@@ -73,4 +87,18 @@ export function clampSeries(value: number): number {
     return DEFAULT_SERIES;
   }
   return Math.min(MAX_SERIES, Math.max(MIN_SERIES, Math.round(value)));
+}
+
+export function clampReps(value: number): number {
+  if (!Number.isFinite(value)) {
+    return DEFAULT_REPS;
+  }
+  return Math.min(MAX_REPS, Math.max(0, Math.round(value)));
+}
+
+export function clampKg(value: number): number {
+  if (!Number.isFinite(value)) {
+    return DEFAULT_KG;
+  }
+  return Math.min(MAX_KG, Math.max(0, Math.round(value * 10) / 10));
 }

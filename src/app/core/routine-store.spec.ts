@@ -77,14 +77,54 @@ describe('RoutineStore', () => {
     expect(ids(reloaded.routinesFor('fri'))).toEqual(['piernas-prensa']);
   });
 
-  it('creates one empty entry per configured series for that day', () => {
+  it('seeds a never-trained exercise with 10 reps and 20 kg', () => {
     store.savePlan(['tue']);
     store.addExercise('tue', 'piernas-sentadilla', 4);
 
     const sets = store.setsFor('tue', 'piernas-sentadilla');
 
     expect(sets.length).toBe(4);
-    expect(sets.every((entry) => entry.reps === null && entry.kg === null && !entry.done)).toBeTrue();
+    expect(sets.every((entry) => entry.reps === 10 && entry.kg === 20 && !entry.done)).toBeTrue();
+  });
+
+  it('seeds a new session with the last values logged for that exercise', () => {
+    store.savePlan(['mon', 'wed']);
+    store.addExercise('mon', 'core-plancha', 2);
+    store.addExercise('wed', 'core-plancha', 2);
+    store.saveSets('mon', 'core-plancha', [
+      { reps: 14, kg: 32.5, done: true },
+      { reps: 12, kg: 30, done: true },
+    ]);
+
+    const sets = store.setsFor('wed', 'core-plancha');
+
+    expect(sets.map((entry) => ({ reps: entry.reps, kg: entry.kg }))).toEqual([
+      { reps: 12, kg: 30 },
+      { reps: 12, kg: 30 },
+    ]);
+  });
+
+  it('allows extra series beyond the configured ones and keeps them', () => {
+    store.savePlan(['mon']);
+    store.addExercise('mon', 'core-plancha', 2);
+
+    store.addSeries('mon', 'core-plancha');
+    store.addSeries('mon', 'core-plancha');
+
+    expect(store.setsFor('mon', 'core-plancha').length).toBe(4);
+    expect(store.seriesFor('mon', 'core-plancha')).toBe(2);
+    expect(store.progressFor('mon', 'core-plancha')).toEqual({ done: 0, total: 4 });
+
+    store.saveSets('mon', 'core-plancha', [
+      { reps: 10, kg: 20, done: true },
+      { reps: 10, kg: 20, done: true },
+      { reps: 10, kg: 20, done: true },
+      { reps: 10, kg: 20, done: true },
+    ]);
+
+    const reloaded = TestBed.runInInjectionContext(() => new RoutineStore());
+    expect(reloaded.setsFor('mon', 'core-plancha').length).toBe(4);
+    expect(reloaded.progressFor('mon', 'core-plancha')).toEqual({ done: 4, total: 4 });
   });
 
   it('reports progress per exercise and across the day routine', () => {

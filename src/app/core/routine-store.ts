@@ -2,16 +2,21 @@ import { Injectable, computed, signal } from '@angular/core';
 
 import { exerciseById } from './exercise-catalog';
 import {
+  DEFAULT_KG,
+  DEFAULT_REPS,
   DEFAULT_SERIES,
   DAY_ORDER,
   DayKey,
   Exercise,
   ExerciseGroup,
+  ExerciseValues,
   MAX_SERIES,
   PlannedExercise,
   SetEntry,
   SessionLogs,
   TrainingPlan,
+  clampKg,
+  clampReps,
   clampSeries,
   formatDays,
   sortDays,
@@ -19,7 +24,10 @@ import {
 } from './models';
 
 const PLAN_STORAGE_KEY = 'rutigym.plan.v2';
-const LOGS_STORAGE_KEY = 'rutigym.logs.v1';
+const LOGS_STORAGE_KEY = 'rutigym.logs.v2';
+const LAST_VALUES_STORAGE_KEY = 'rutigym.last-values.v1';
+
+type LastValues = Readonly<Record<string, ExerciseValues>>;
 
 function readFromStorage<T>(key: string): T | null {
   if (typeof localStorage === 'undefined') {
@@ -58,13 +66,15 @@ export interface DaySelection {
 }
 
 /**
- * Single source of truth for the weekly plan — one independent routine per day — and the
- * per-day workout log. Signal based, mirrored into `localStorage` so the MVP survives a reload.
+ * Single source of truth for the weekly plan — one independent routine per day — the
+ * per-day workout log (extra sets included) and the last values used per exercise.
+ * Signal based, mirrored into `localStorage` so the MVP survives a reload.
  */
 @Injectable({ providedIn: 'root' })
 export class RoutineStore {
   private readonly planState = signal<TrainingPlan | null>(this.readPlan());
   private readonly logsState = signal<SessionLogs>(this.readLogs());
+  private readonly lastValuesState = signal<LastValues>(this.readLastValues());
   private readonly draftDaysState = signal<readonly DayKey[] | null>(null);
 
   readonly plan = this.planState.asReadonly();
@@ -179,28 +189,62 @@ export class RoutineStore {
     }
   }
 
-  /** One entry per configured series, seeded from what the user already logged. */
+  /** Last values used for an exercise, or the session defaults when it was never logged. */
+  lastValuesFor(exerciseId: string): ExerciseValues {
+    return this.lastValuesState()[exerciseId] ?? { reps: DEFAULT_REPS, kg: DEFAULT_KG };
+  }
+
+  /**
+   * Planned series plus any extra series added in this session, seeded from what the user
+   * already logged — otherwise from the last values of that exercise, otherwise 10 reps / 20 kg.
+   */
   setsFor(day: DayKey, exerciseId: string): SetEntry[] {
     const stored = this.logsState()[day]?.[exerciseId] ?? [];
-    // Falls back to the logged length so history survives clearing the routine (BORRAR).
-    const total = Math.min(MAX_SERIES, Math.max(0, this.seriesFor(day, exerciseId) || stored.length));
+    const total = Math.max(this.seriesFor(day, exerciseId), stored.length);
+    const seed = this.lastValuesFor(exerciseId);
+
     return Array.from({ length: total }, (_, index) => {
       const entry = stored[index];
       return {
-        reps: entry?.reps ?? null,
-        kg: entry?.kg ?? null,
+        reps: entry ? clampReps(entry.reps) : seed.reps,
+        kg: entry ? clampKg(entry.kg) : seed.kg,
         done: entry?.done ?? false,
       };
     });
   }
 
+  /** Appends one extra series to the session log of that exercise. */
+  addSeries(day: DayKey, exerciseId: string): void {
+    const current = this.setsFor(day, exerciseId);
+    const previous = current[current.length - 1];
+    const seed = previous ?? this.lastValuesFor(exerciseId);
+    this.saveSets(day, exerciseId, [
+      ...current,
+      { reps: clampReps(seed.reps), kg: clampKg(seed.kg), done: false },
+    ]);
+  }
+
   saveSets(day: DayKey, exerciseId: string, entries: readonly SetEntry[]): void {
     const dayLogs = { ...(this.logsState()[day] ?? {}) };
-    dayLogs[exerciseId] = entries.map((entry) => ({ ...entry }));
+    const normalized = entries.map((entry) => ({
+      reps: clampReps(entry.reps),
+      kg: clampKg(entry.kg),
+      done: entry.done,
+    }));
+    dayLogs[exerciseId] = normalized;
     const logs: SessionLogs = { ...this.logsState(), [day]: dayLogs };
-
     this.logsState.set(logs);
     writeToStorage(LOGS_STORAGE_KEY, logs);
+
+    const last = normalized[normalized.length - 1];
+    if (last) {
+      const values: LastValues = {
+        ...this.lastValuesState(),
+        [exerciseId]: { reps: last.reps, kg: last.kg },
+      };
+      this.lastValuesState.set(values);
+      writeToStorage(LAST_VALUES_STORAGE_KEY, values);
+    }
   }
 
   progressFor(day: DayKey, exerciseId: string): { done: number; total: number } {
@@ -287,6 +331,46 @@ export class RoutineStore {
 
   private readLogs(): SessionLogs {
     const stored = readFromStorage<SessionLogs>(LOGS_STORAGE_KEY);
-    return stored && typeof stored === 'object' ? stored : {};
+    if (!stored || typeof stored !== 'object') {
+      return {};
+    }
+
+    const logs: Record<string, Record<string, readonly SetEntry[]>> = {};
+    for (const [day, exercises] of Object.entries(stored as Record<string, unknown>)) {
+      if (!DAY_ORDER.includes(day as DayKey) || !exercises || typeof exercises !== 'object') {
+        continue;
+      }
+      const byExercise: Record<string, readonly SetEntry[]> = {};
+      for (const [exerciseId, entries] of Object.entries(exercises as Record<string, unknown>)) {
+        if (!Array.isArray(entries)) {
+          continue;
+        }
+        byExercise[exerciseId] = entries.map((entry: Partial<SetEntry>) => ({
+          reps: clampReps(Number(entry?.reps ?? DEFAULT_REPS)),
+          kg: clampKg(Number(entry?.kg ?? DEFAULT_KG)),
+          done: !!entry?.done,
+        }));
+      }
+      logs[day] = byExercise;
+    }
+    return logs;
+  }
+
+  private readLastValues(): LastValues {
+    const stored = readFromStorage<Record<string, Partial<ExerciseValues>>>(LAST_VALUES_STORAGE_KEY);
+    if (!stored || typeof stored !== 'object') {
+      return {};
+    }
+    const values: Record<string, ExerciseValues> = {};
+    for (const [exerciseId, entry] of Object.entries(stored)) {
+      if (!entry || typeof entry !== 'object') {
+        continue;
+      }
+      values[exerciseId] = {
+        reps: clampReps(Number(entry.reps ?? DEFAULT_REPS)),
+        kg: clampKg(Number(entry.kg ?? DEFAULT_KG)),
+      };
+    }
+    return values;
   }
 }

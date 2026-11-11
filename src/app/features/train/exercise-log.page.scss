@@ -11,67 +11,74 @@
   white-space: nowrap;
 }
 
-.log__summary {
+.log__meta {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: 12px;
+  margin-bottom: -8px;
 }
 
 .log__count {
-  font-size: 26px;
+  font-size: 16px;
   font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: -0.03em;
-  color: var(--blue-800);
+  letter-spacing: -0.01em;
+  color: var(--ink);
 }
 
-.log__hint {
-  font-size: 12.5px;
-  line-height: 1.5;
+.log__percent {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
   color: var(--muted);
+}
+
+.set-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
 }
 
 .set {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 14px 16px;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 12px 14px;
   border: 1.5px solid var(--line);
-  border-radius: var(--radius-md);
+  border-radius: 20px;
   background: var(--surface);
+  color: var(--ink);
   transition:
+    background 0.18s ease,
     border-color 0.18s ease,
-    background 0.18s ease;
+    color 0.18s ease;
 }
 
 .set--done {
-  border-color: rgba(18, 184, 200, 0.45);
-  background: linear-gradient(180deg, #f2fdfd, #ffffff 70%);
-}
-
-.set__head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  border-color: transparent;
+  background: linear-gradient(120deg, #4aa95a, #3a9a4a);
+  color: #fff;
+  box-shadow: 0 16px 26px -22px rgba(47, 138, 64, 0.9);
 }
 
 .set__check {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   flex: 0 0 auto;
   border: 2px solid var(--blue-200);
-  border-radius: 9px;
+  border-radius: 50%;
   background: #fff;
-  color: #fff;
+  color: var(--green-600);
   cursor: pointer;
   transition:
+    transform 0.14s ease,
     background 0.16s ease,
-    border-color 0.16s ease,
-    transform 0.16s ease;
+    border-color 0.16s ease;
 }
 
 .set__check:active {
@@ -79,46 +86,115 @@
 }
 
 .set__check svg {
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
 }
 
 .set--done .set__check {
-  border-color: var(--teal);
-  background: var(--teal);
+  border-color: #fff;
+  background: #fff;
 }
 
-.set__label {
-  font-size: 14px;
+.set__index {
+  width: 18px;
+  flex: 0 0 auto;
+  margin-right: auto;
+  font-size: 19px;
   font-weight: 800;
-  letter-spacing: 0.01em;
+  line-height: 1;
+  text-align: center;
 }
 
-.set__state {
-  margin-left: auto;
-  font-size: 11px;
+.set__field {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+
+.set__pill {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 3px 4px;
+  border-radius: 999px;
+  background: #eef1f6;
+  transition: background 0.18s ease;
+}
+
+.set--done .set__pill {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.set__arrow {
+  width: 24px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1;
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity 0.14s ease;
+}
+
+.set__arrow:hover,
+.set__arrow:active {
+  opacity: 1;
+}
+
+.set__value {
+  min-width: 36px;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.set__unit {
+  font-size: 9.5px;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
 }
 
-.set--done .set__state {
-  color: #0b8f8f;
+.set--done .set__unit {
+  color: rgba(255, 255, 255, 0.82);
 }
 
-.set__fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.set__field {
+.add-set {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 52px;
+  border: 1.5px dashed var(--blue-200);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--blue-600);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease;
 }
 
-.set__field .field__label {
-  padding-left: 2px;
+.add-set:hover {
+  border-color: var(--blue-300);
+  background: #fff;
+}
+
+.add-set__icon {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
 }

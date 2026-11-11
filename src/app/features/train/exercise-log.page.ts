@@ -1,18 +1,17 @@
-import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
 import { exerciseById } from '../../core/exercise-catalog';
-import { DAY_ORDER, DayKey, SetEntry } from '../../core/models';
+import {
+  DAY_ORDER,
+  DayKey,
+  KG_STEP,
+  REPS_STEP,
+  SetEntry,
+  clampKg,
+  clampReps,
+} from '../../core/models';
 import { RoutineStore } from '../../core/routine-store';
-
-function readNumber(event: Event): number | null {
-  const raw = (event.target as HTMLInputElement).value.trim().replace(',', '.');
-  if (raw === '') {
-    return null;
-  }
-  const parsed = Number(raw);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
-}
 
 @Component({
   selector: 'app-exercise-log-page',
@@ -20,8 +19,8 @@ function readNumber(event: Event): number | null {
   templateUrl: './exercise-log.page.html',
   styleUrl: './exercise-log.page.scss',
 })
-export class ExerciseLogPage implements OnInit {
-  protected readonly store = inject(RoutineStore);
+export class ExerciseLogPage {
+  private readonly store = inject(RoutineStore);
   private readonly router = inject(Router);
 
   readonly day = input.required<string>();
@@ -36,7 +35,10 @@ export class ExerciseLogPage implements OnInit {
     const day = this.dayKey();
     return !!day && this.store.isPlanned(day, this.exerciseId());
   });
-  protected readonly entries = signal<readonly SetEntry[]>([]);
+  protected readonly entries = computed<readonly SetEntry[]>(() => {
+    const day = this.dayKey();
+    return day ? this.store.setsFor(day, this.exerciseId()) : [];
+  });
   protected readonly doneCount = computed(
     () => this.entries().filter((entry) => entry.done).length,
   );
@@ -45,17 +47,8 @@ export class ExerciseLogPage implements OnInit {
     return total === 0 ? 0 : Math.round((this.doneCount() / total) * 100);
   });
 
-  ngOnInit(): void {
-    const day = this.dayKey();
-    this.entries.set(day ? this.store.setsFor(day, this.exerciseId()) : []);
-  }
-
-  protected setReps(index: number, event: Event): void {
-    this.patch(index, { reps: readNumber(event) });
-  }
-
-  protected setKg(index: number, event: Event): void {
-    this.patch(index, { kg: readNumber(event) });
+  protected formatKg(value: number): string {
+    return Number.isInteger(value) ? String(value) : value.toFixed(1).replace('.', ',');
   }
 
   protected toggleDone(index: number): void {
@@ -63,18 +56,41 @@ export class ExerciseLogPage implements OnInit {
     this.patch(index, { done: !entry.done });
   }
 
-  protected save(): void {
+  protected adjustReps(index: number, direction: -1 | 1): void {
+    this.patch(index, { reps: clampReps(this.entries()[index].reps + direction * REPS_STEP) });
+  }
+
+  protected adjustKg(index: number, direction: -1 | 1): void {
+    this.patch(index, { kg: clampKg(this.entries()[index].kg + direction * KG_STEP) });
+  }
+
+  protected addSeries(): void {
+    const day = this.dayKey();
+    if (day) {
+      this.store.addSeries(day, this.exerciseId());
+    }
+  }
+
+  /** Saves nothing extra (every tap is persisted) and moves to the next exercise of the day. */
+  protected next(): void {
     const day = this.dayKey();
     if (!day) {
       return;
     }
-    this.store.saveSets(day, this.exerciseId(), this.entries());
-    void this.router.navigate(['/entrenar', day]);
+    const routine = this.store.routinesFor(day).map((item) => item.exerciseId);
+    const index = routine.indexOf(this.exerciseId());
+    const nextId = index >= 0 ? routine[index + 1] : undefined;
+    void this.router.navigate(nextId ? ['/entrenar', day, nextId] : ['/entrenar', day]);
   }
 
   private patch(index: number, changes: Partial<SetEntry>): void {
-    this.entries.update((current) =>
-      current.map((entry, position) => (position === index ? { ...entry, ...changes } : entry)),
+    const day = this.dayKey();
+    if (!day) {
+      return;
+    }
+    const entries = this.entries().map((entry, position) =>
+      position === index ? { ...entry, ...changes } : entry,
     );
+    this.store.saveSets(day, this.exerciseId(), entries);
   }
 }
