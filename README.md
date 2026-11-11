@@ -27,7 +27,7 @@ Tema visual azul (azul marino profundo → azul vivo, superficies azul claro). T
 | `/configurar/rutinas/:day/agregar` | Añadir ejercicios | Catálogo agrupado en **CORE**, **PIERNAS** y **BRAZOS** con selección múltiple; los ya añadidos aparecen deshabilitados |
 | `/entrenar` | Entrenar | Días del plan con sus ejercicios y series, con el día actual preseleccionado y botón **Empezar** |
 | `/entrenar/:day` | Rutina del día | Ejercicios del día agrupados por bloque, con progreso de series registradas y aviso cuando el día está vacío |
-| `/entrenar/:day/:exerciseId` | Registro | Repeticiones y kilos por serie, con marca de serie completada |
+| `/entrenar/:day/:exerciseId` | Registro | Series con check, número, pastilla de kg y pastilla de reps; serie hecha en verde, `‹ ›` para cambiar reps (±1) y kg (±2,5), y `+ Añadir una serie` para series extra |
 
 ### Flujo
 
@@ -45,12 +45,17 @@ afecta a los demás, y un día puede quedar sin ejercicios (la pantalla de entre
 El MVP no usa backend. El plan semanal y el registro de series se guardan en `localStorage`:
 
 - `rutigym.plan.v2` → días configurados y la rutina de cada día (`routines[day]`, en orden de alta).
-- `rutigym.logs.v1` → repeticiones y kilos registrados por día y ejercicio.
+- `rutigym.logs.v2` → series registradas por día y ejercicio; la longitud puede superar las series
+  configuradas cuando se añaden series extra en la sesión.
+- `rutigym.last-values.v1` → últimos reps/kg usados por ejercicio, para precargar la próxima sesión.
 
-La clave del plan es `v2`: un plan guardado con el modelo anterior (`v1`, una rutina compartida) no se
-lee, tal como corresponde a este MVP sin usuarios reales. La integración de
-`@capacitor-community/sqlite` queda para una siguiente iteración; el acceso al almacenamiento está
-aislado en `RoutineStore` para poder sustituirlo sin tocar las pantallas.
+Los valores de una serie no se escriben a mano: arrancan con `10` reps y `20` kg si el ejercicio nunca
+se registró, o con los últimos valores usados de ese ejercicio, y se ajustan con los botones `‹ ›`.
+La clave del plan es `v2` y la de logs es `v2`: un plan o un log del modelo anterior (`v1`) no se lee,
+tal como corresponde a este MVP sin usuarios reales.
+
+La integración de `@capacitor-community/sqlite` queda para una siguiente iteración; el acceso al
+almacenamiento está aislado en `RoutineStore` para poder sustituirlo sin tocar las pantallas.
 
 ## Estructura del proyecto
 
