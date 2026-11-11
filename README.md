@@ -53,15 +53,15 @@ catálogo los referencia con el campo `image`:
 ```
 
 Los grupos son deliberadamente amplios: **CORE** incluye los ejercicios de pecho y **BRAZOS** los de
-hombro; no hay grupos separados de PECHO ni HOMBRO.
+hombro; no hay grupos separados de PECHO ni HOMBRO. **ESPALDA** es un grupo propio y agrupa los
+tirones de espalda (jalón al pecho y remo sentado).
 
 - La pantalla de registro (`/entrenar/:day/:exerciseId`) muestra la imagen en una tarjeta blanca
   entre la barra de progreso y la lista de series.
 - Si el ejercicio no tiene `image`, la tarjeta **no se renderiza** (sin huecos ni imágenes roscas).
 - Hoy usan imagen: `core-contractora`, `core-press-pecho`, `brazos-press-hombros`,
-  `piernas-extension` y `brazos-curl-barra`.
-- Quedan cargados sin usar `lat-pulley.webp` y `seated-row.webp` (jalón al pecho y remo sentado),
-  a la espera de decidir en qué grupo entran.
+  `espalda-jalon-pecho`, `espalda-remo-sentado`, `piernas-extension` y `brazos-curl-barra`, es decir
+  los siete renders disponibles.
 
 ### Progreso
 - **Terminar día** toma las series completadas de ese día, las guarda como una **sesión con fecha**
