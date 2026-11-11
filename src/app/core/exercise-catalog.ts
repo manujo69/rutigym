@@ -27,6 +27,7 @@ export const EXERCISES: readonly Exercise[] = [
 
   { id: 'espalda-jalon-pecho', name: 'Jalón al pecho', group: 'ESPALDA', image: '/exercises/lat-pulley.webp' },
   { id: 'espalda-remo-sentado', name: 'Remo sentado', group: 'ESPALDA', image: '/exercises/seated-row.webp' },
+  { id: 'espalda-multiestacion', name: 'Multiestación en máquina', group: 'ESPALDA', image: '/exercises/multi-gym.webp' },
 ];
 
 export const GROUP_ORDER: readonly ExerciseGroup[] = ['CORE', 'PIERNAS', 'BRAZOS', 'ESPALDA'];
