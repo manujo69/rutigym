@@ -104,7 +104,7 @@ El MVP no usa backend: los datos viven en **SQLite** (`@capacitor-community/sqli
 - **Migración**: en el primer arranque con la base vacía se importan las claves `rutigym.*` del
   modelo anterior y se marca `legacy_migrated`. `localStorage` no se vuelve a escribir ni a leer
   (las claves viejas quedan inertes).
-- `RoutineStore` conserva su API de signals; la hidratación ocurre una vez, antes del primer render,
+- `RoutineStore` conserva su API de signals; el estado se carga una vez, antes del primer render,
   vía `provideAppInitializer`. El acceso a datos está detrás de `RoutineRepository`, con una
   implementación en memoria para los tests.
 

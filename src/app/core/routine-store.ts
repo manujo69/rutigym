@@ -80,7 +80,7 @@ export interface DaySelection {
  * Single source of truth for the weekly plan — one independent routine per day — the
  * per-day workout log (extra sets included), the last values used per exercise and the
  * finished sessions. State is signal based; persistence goes through `RoutineRepository`
- * (SQLite in the app), and is hydrated once during app bootstrap.
+ * (SQLite in the app) and is loaded once during app bootstrap.
  */
 @Injectable({ providedIn: 'root' })
 export class RoutineStore {
@@ -131,7 +131,7 @@ export class RoutineStore {
       }
     }
 
-    this.hydrate(snapshot);
+    this.loadState(snapshot);
     this.initialized = true;
   }
 
@@ -448,7 +448,8 @@ export class RoutineStore {
     this.persistSessions(this.sessionsState().filter((session) => !session.demo));
   }
 
-  private hydrate(snapshot: RoutineSnapshot): void {
+  /** Applies the persisted snapshot to the signals. Not to be confused with Angular hydration: this app has no SSR. */
+  private loadState(snapshot: RoutineSnapshot): void {
     this.planState.set(
       snapshot.days.length > 0
         ? {
