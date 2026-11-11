@@ -44,3 +44,10 @@ Thumbs.db
 
 # ODD task documents
 odd/
+
+# Android / Capacitor build outputs
+android/local.properties
+android/.gradle/
+android/build/
+android/app/build/
+android/capacitor-cordova-android-plugins/build/
