@@ -7,7 +7,7 @@
 .week {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 6px;
+  gap: 5px;
 }
 
 .week__tile {
@@ -17,22 +17,22 @@
   gap: 6px;
   min-height: 96px;
   padding: 10px 4px 8px;
-  border: 1.5px solid var(--line);
-  border-radius: 15px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
   background: var(--surface);
   text-align: center;
 }
 
 .week__tile--done {
   border-color: transparent;
-  background: linear-gradient(165deg, var(--blue-450), var(--blue-600));
+  background: var(--blue-500);
   color: #fff;
-  box-shadow: 0 16px 28px -20px rgba(46, 86, 245, 0.95);
+  box-shadow: 0 12px 22px -16px rgba(60, 107, 245, 0.9);
 }
 
 .week__tile--rest {
   border-color: transparent;
-  background: #e8ecf6;
+  background: var(--blue-100);
   color: var(--muted);
 }
 
@@ -44,10 +44,10 @@
 }
 
 .week__label {
-  font-size: 8px;
+  font-size: 7.5px;
   font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: 0.06em;
+  line-height: 1.2;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -90,9 +90,9 @@
   justify-content: space-between;
   gap: 12px;
   padding: 12px 14px;
-  border: 1px dashed var(--blue-200);
+  border: 1px dashed var(--line);
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--surface);
 }
 
 .progress__demo .btn--link {
@@ -146,13 +146,13 @@
 }
 
 .session__title {
-  font-size: 13.5px;
+  font-size: 14.5px;
   font-weight: 800;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.01em;
 }
 
 .session__meta {
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--muted);
 }
@@ -170,8 +170,8 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
-  padding: 9px 12px;
-  border-radius: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
   background: var(--blue-50);
 }
 
@@ -189,10 +189,10 @@
 }
 
 .session__group {
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 800;
   letter-spacing: 0.1em;
-  color: var(--blue-400);
+  color: var(--blue-500);
 }
 
 .session__sets {
