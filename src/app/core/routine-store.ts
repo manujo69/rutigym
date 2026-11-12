@@ -31,6 +31,7 @@ import {
   todayKey,
 } from './models';
 import { ROUTINE_REPOSITORY, RoutineMap, RoutineSnapshot } from './data/routine.repository';
+import { parseBackup, serializeBackup } from './backup';
 
 const LEGACY_PLAN_KEY = 'rutigym.plan.v2';
 const LEGACY_LOGS_KEY = 'rutigym.logs.v2';
@@ -67,6 +68,10 @@ export interface GroupedExercises {
   readonly group: ExerciseGroup;
   readonly exercises: readonly PlannedExercise[];
 }
+
+export type ImportResult =
+  | { readonly ok: true; readonly days: number; readonly exercises: number }
+  | { readonly ok: false; readonly error: string };
 
 export interface DaySelection {
   readonly day: DayKey;
@@ -216,6 +221,57 @@ export class RoutineStore {
     this.planState.set(null);
     this.draftDaysState.set(null);
     this.persist(() => this.repository.clearPlan());
+  }
+
+  /** Portable JSON copy of the plan and the history, so data can move between devices. */
+  exportBackup(): string {
+    const plan = this.planState();
+    return serializeBackup({
+      days: plan?.days ?? [],
+      routines: plan?.routines ?? {},
+      logs: this.logsState(),
+      lastValues: this.lastValuesState(),
+      sessions: this.sessionsState(),
+    });
+  }
+
+  /** Replaces the plan and the history with a backup the user pasted. */
+  async importBackup(raw: string): Promise<ImportResult> {
+    const parsed = parseBackup(raw);
+    if (!parsed.ok) {
+      return parsed;
+    }
+
+    const { days, routines, logs, lastValues, sessions } = parsed.backup;
+    this.planState.set({ days, routines, updatedAt: new Date().toISOString() });
+    this.logsState.set(logs);
+    this.lastValuesState.set(lastValues);
+    this.sessionsState.set(sessions);
+    this.draftDaysState.set(null);
+
+    try {
+      await this.repository.savePlan(days, routines as RoutineMap);
+      for (const day of DAY_ORDER) {
+        await this.repository.deleteDayLogs(day);
+      }
+      for (const [day, byExercise] of Object.entries(logs)) {
+        for (const [exerciseId, entries] of Object.entries(byExercise ?? {})) {
+          await this.repository.saveSets(day as DayKey, exerciseId, entries);
+        }
+      }
+      for (const [exerciseId, values] of Object.entries(lastValues)) {
+        await this.repository.saveLastValue(exerciseId, values);
+      }
+      await this.repository.replaceSessions(sessions);
+    } catch {
+      return { ok: false, error: 'No se pudo guardar la copia en este dispositivo.' };
+    }
+
+    return {
+      ok: true,
+      days: days.length,
+      exercises: days.reduce((total, day) => total + (routines[day]?.length ?? 0), 0),
+    };
   }
 
   /** Last values used for an exercise, or the session defaults when it was never logged. */

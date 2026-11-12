@@ -80,4 +80,47 @@
       </ol>
     </div>
   }
+  <div class="card">
+    <span class="eyebrow">Copia de seguridad</span>
+    <p class="muted">
+      Llevá tu plan y tu historial de un dispositivo a otro: copiá el texto acá y pegalo en el otro.
+    </p>
+
+    @if (backupText()) {
+      <textarea class="config__textarea" rows="6" readonly>{{ backupText() }}</textarea>
+    }
+
+    <button type="button" class="btn btn--outline" (click)="copyBackup()">Copiar mi plan</button>
+
+    @if (importing()) {
+      <textarea
+        class="config__textarea"
+        rows="6"
+        placeholder="Pegá aquí la copia"
+        [value]="importText()"
+        (input)="importText.set($any($event.target).value)"
+      ></textarea>
+      <div class="config__confirm-actions">
+        <button
+          type="button"
+          class="btn btn--primary btn--sm"
+          [disabled]="!importText().trim()"
+          (click)="applyImport()"
+        >
+          Importar
+        </button>
+        <button type="button" class="btn btn--ghost btn--sm" (click)="cancelImport()">
+          Cancelar
+        </button>
+      </div>
+    } @else {
+      <button type="button" class="btn btn--dash" (click)="startImport()">Importar un plan</button>
+    }
+
+    @if (message(); as feedback) {
+      <p class="config__message" [class.config__message--error]="feedback.kind === 'error'">
+        {{ feedback.text }}
+      </p>
+    }
+  </div>
 </section>

@@ -68,3 +68,26 @@
   line-height: 1.45;
   color: var(--muted);
 }
+
+.config__textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--blue-50);
+  color: var(--ink);
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.config__message {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green-600);
+}
+
+.config__message--error {
+  color: var(--danger);
+}

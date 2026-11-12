@@ -278,4 +278,48 @@ describe('RoutineStore', () => {
       expect(store.sessions().length).toBe(1);
     });
   });
+
+  describe('backup', () => {
+    const backup = {
+      app: 'rutigym',
+      version: 1,
+      exportedAt: '2026-11-12T10:00:00.000Z',
+      days: ['tue'],
+      routines: { tue: [{ exerciseId: 'espalda-dominadas', series: 5 }] },
+      logs: { tue: { 'espalda-dominadas': [{ reps: 8, kg: 10, done: true }] } },
+      lastValues: { 'espalda-dominadas': { reps: 8, kg: 10 } },
+      sessions: [],
+    };
+
+    it('replaces the plan with an imported copy', async () => {
+      store.savePlan(['mon']);
+
+      const result = await store.importBackup(JSON.stringify(backup));
+
+      expect(result.ok).toBeTrue();
+      expect(store.days()).toEqual(['tue']);
+      expect(ids(store.routinesFor('tue'))).toEqual(['espalda-dominadas']);
+      expect(store.setsFor('tue', 'espalda-dominadas').length).toBe(5);
+      expect(store.setsFor('tue', 'espalda-dominadas')[0].done).toBeTrue();
+    });
+
+    it('keeps the current plan when the copy is invalid', async () => {
+      store.savePlan(['mon']);
+
+      const result = await store.importBackup('{ roto');
+
+      expect(result.ok).toBeFalse();
+      expect(store.days()).toEqual(['mon']);
+    });
+
+    it('exports what it imported', async () => {
+      await store.importBackup(JSON.stringify(backup));
+
+      const exported = JSON.parse(store.exportBackup());
+
+      expect(exported.app).toBe('rutigym');
+      expect(exported.days).toEqual(['tue']);
+      expect(exported.routines.tue).toEqual([{ exerciseId: 'espalda-dominadas', series: 5 }]);
+    });
+  });
 });
