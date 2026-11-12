@@ -65,6 +65,8 @@ function asDay(value: string): DayKey | null {
 
 @Injectable({ providedIn: 'root' })
 export class SqliteRoutineRepository implements RoutineRepository {
+  private writeQueue: Promise<unknown> = Promise.resolve();
+
   constructor(private readonly sqlite: SqliteService) {}
 
   async load(): Promise<RoutineSnapshot> {
@@ -274,8 +276,19 @@ export class SqliteRoutineRepository implements RoutineRepository {
     ]);
   }
 
+  /**
+   * Queues the statements so only one write is ever in flight. The web driver wraps each
+   * `run` in a transaction on the shared connection, so two overlapping writes fail with
+   * "cannot start a transaction within a transaction".
+   */
+  private mutate(statements: readonly Statement[]): Promise<void> {
+    const write = this.writeQueue.then(() => this.runStatements(statements));
+    this.writeQueue = write.catch(() => undefined);
+    return write;
+  }
+
   /** Runs the statements and flushes the web store once, so a reload sees the data. */
-  private async mutate(statements: readonly Statement[]): Promise<void> {
+  private async runStatements(statements: readonly Statement[]): Promise<void> {
     const db = await this.sqlite.getConnection();
     for (const statement of statements) {
       await db.run(statement.sql, statement.values ? [...statement.values] : []);
