@@ -6,7 +6,9 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "android:apk": "npm run build && npx cap sync android && JAVA_HOME=${JAVA_HOME:-/opt/android-studio/jbr} ./android/gradlew -p android assembleDebug && echo 'APK: android/app/build/outputs/apk/debug/app-debug.apk'",
+    "android:install": "npm run android:apk && adb install -r android/app/build/outputs/apk/debug/app-debug.apk"
   },
   "prettier": {
     "printWidth": 100,
