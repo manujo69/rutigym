@@ -11,20 +11,11 @@
 }
 
 .home__logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 46px;
   height: 46px;
+  flex: 0 0 auto;
   border-radius: 50%;
-  background: var(--blue-500);
-  color: #fff;
   box-shadow: 0 12px 22px -14px rgba(60, 107, 245, 0.9);
-}
-
-.home__logo svg {
-  width: 24px;
-  height: 24px;
 }
 
 .home__brand {
@@ -52,23 +43,13 @@
   padding: 26px 22px;
   overflow: hidden;
   border-radius: var(--radius-xl);
+  /* La foto al 60%: el resto deja ver el azul de la tarjeta. */
   background:
-    radial-gradient(circle at 92% 4%, rgba(255, 255, 255, 0.16), transparent 46%),
-    radial-gradient(circle at 2% 98%, rgba(255, 255, 255, 0.11), transparent 44%),
+    linear-gradient(rgba(60, 107, 245, 0.4), rgba(60, 107, 245, 0.4)),
+    url('/home-hero.png') center / cover no-repeat,
     var(--blue-500);
   color: #f2f6ff;
   box-shadow: 0 26px 44px -30px rgba(60, 107, 245, 0.95);
-}
-
-.home__glow {
-  position: absolute;
-  right: -70px;
-  bottom: -90px;
-  width: 240px;
-  height: 240px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.16);
-  pointer-events: none;
 }
 
 .home__hero-body {
@@ -98,6 +79,13 @@
   font-size: 15.5px;
   line-height: 1.55;
   color: rgba(242, 246, 255, 0.86);
+}
+
+/* La foto de fondo tiene zonas claras: la sombra sostiene el texto blanco. */
+.home__eyebrow,
+.home__title,
+.home__subtitle {
+  text-shadow: 1px 1px 1px #000;
 }
 
 .home__plan {

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><defs>
+<radialGradient id="bg" cx="35%" cy="28%" r="85%">
+<stop offset="0" stop-color="#2F72C0"/>
+<stop offset="1" stop-color="#17437F"/>
+</radialGradient>
+<linearGradient id="gB" gradientUnits="userSpaceOnUse" x1="217" y1="188" x2="295" y2="324">
+<stop offset="0" stop-color="#F6F9FD"/>
+<stop offset="0.5" stop-color="#DDE6F3"/>
+<stop offset="1" stop-color="#A5B8D4"/>
+</linearGradient>
+<linearGradient id="gM" gradientUnits="userSpaceOnUse" x1="228" y1="207" x2="284" y2="305">
+<stop offset="0" stop-color="#F6F9FD"/>
+<stop offset="0.5" stop-color="#DDE6F3"/>
+<stop offset="1" stop-color="#A5B8D4"/>
+</linearGradient>
+<linearGradient id="gH" gradientUnits="userSpaceOnUse" x1="248" y1="242" x2="264" y2="270">
+<stop offset="0" stop-color="#EAF0F8"/>
+<stop offset="1" stop-color="#8FA4C6"/>
+</linearGradient>
+<linearGradient id="gG" gradientUnits="userSpaceOnUse" x1="246" y1="239" x2="266" y2="273">
+<stop offset="0" stop-color="#E2E9F4"/>
+<stop offset="1" stop-color="#9AAECC"/>
+</linearGradient>
+<filter id="sh" x="-25%" y="-25%" width="150%" height="160%">
+<feDropShadow dx="0" dy="14" stdDeviation="10" flood-color="#0A2347" flood-opacity="0.45"/>
+</filter>
+</defs><circle cx="256" cy="256" r="248" fill="url(#bg)"/><g transform="translate(256 256) scale(1.1) translate(-256 -256)">
+<g filter="url(#sh)">
+<path d="M 414 230 A 56.3 32.5 60 0 0 358 132 A 56.3 32.5 60 0 0 414 230 Z" fill="url(#gM)"/>
+<polygon points="337,144 358,132 414,230 393,242" fill="url(#gM)"/>
+<path d="M 404 261 A 78.4 45.3 60 0 0 326 125 A 78.4 45.3 60 0 0 404 261 Z" fill="url(#gB)"/>
+<polygon points="297,142 326,125 404,261 375,278" fill="url(#gB)"/>
+<ellipse cx="336" cy="210" rx="78.4" ry="45.3" transform="rotate(60 336 210)" fill="#FFFFFF"/>
+<ellipse cx="336" cy="210" rx="62.7" ry="36.2" transform="rotate(60 336 210)" fill="#EDF2F9"/>
+<path d="M 344 224 A 15.9 9.2 60 0 0 328 196 A 15.9 9.2 60 0 0 344 224 Z" fill="url(#gH)"/>
+<polygon points="168,288 328,196 344,224 184,316" fill="url(#gH)"/>
+<path d="M 301 253 A 19.6 11.3 60 0 0 281 219 A 19.6 11.3 60 0 0 301 253 Z" fill="url(#gG)"/>
+<polygon points="211,259 281,219 301,253 231,293" fill="url(#gG)"/>
+<ellipse cx="221" cy="276" rx="19.6" ry="11.3" transform="rotate(60 221 276)" fill="#FFFFFF"/>
+<path d="M 215 370 A 78.4 45.3 60 0 0 137 234 A 78.4 45.3 60 0 0 215 370 Z" fill="url(#gB)"/>
+<polygon points="108,251 137,234 215,370 186,387" fill="url(#gB)"/>
+<ellipse cx="147" cy="319" rx="78.4" ry="45.3" transform="rotate(60 147 319)" fill="#FFFFFF"/>
+<ellipse cx="147" cy="319" rx="62.7" ry="36.2" transform="rotate(60 147 319)" fill="#EDF2F9"/>
+<path d="M 175 368 A 56.3 32.5 60 0 0 119 270 A 56.3 32.5 60 0 0 175 368 Z" fill="url(#gM)"/>
+<polygon points="98,282 119,270 175,368 154,380" fill="url(#gM)"/>
+<ellipse cx="126" cy="331" rx="56.3" ry="32.5" transform="rotate(60 126 331)" fill="#FFFFFF"/>
+<ellipse cx="126" cy="331" rx="45.1" ry="26" transform="rotate(60 126 331)" fill="#EDF2F9"/>
+<ellipse cx="126" cy="331" rx="14" ry="8" transform="rotate(60 126 331)" fill="#D2DDED"/>
+</g>
+</g></svg>
