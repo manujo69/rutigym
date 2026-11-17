@@ -58,4 +58,42 @@ describe('ConfigAddExercisesComponent', () => {
     expect(store.isPlanned('mon', 'core-hollow')).toBeTrue();
     expect(navigate).toHaveBeenCalledWith(['/configurar/rutinas', 'mon']);
   });
+
+  it('shows the machine thumbnail between the check and the name', () => {
+    const plancha = row('Plancha abdominal');
+    const image = plancha.querySelector('.pick-row__thumb img') as HTMLImageElement;
+
+    expect(image).toBeTruthy();
+    expect(image.getAttribute('src')).toBe('/exercises/floor-mat.webp');
+    expect(image.getAttribute('loading')).toBe('lazy');
+    expect(image.getAttribute('alt')).toBe('');
+
+    expect([...plancha.children].map((child) => child.className)).toEqual([
+      'pick-row__box',
+      'pick-row__thumb',
+      'pick-row__name',
+    ]);
+  });
+
+  it('fits every row in a narrow viewport without horizontal overflow', () => {
+    const host = fixture.nativeElement as HTMLElement;
+    host.style.display = 'block';
+
+    for (const width of ['360px', '412px']) {
+      host.style.width = width;
+      fixture.detectChanges();
+
+      const rows = [...host.querySelectorAll('.pick-row')] as HTMLElement[];
+
+      expect(rows.length).toBeGreaterThan(0);
+      for (const element of rows) {
+        expect(element.scrollWidth)
+          .withContext(`${width}: la fila no entra en la pantalla`)
+          .toBeLessThanOrEqual(element.clientWidth + 1);
+      }
+      expect(host.scrollWidth)
+        .withContext(`${width}: la página desborda a lo ancho`)
+        .toBeLessThanOrEqual(host.clientWidth + 1);
+    }
+  });
 });

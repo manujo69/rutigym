@@ -45,6 +45,11 @@
                   </svg>
                 }
               </span>
+              @if (exercise.image) {
+                <span class="pick-row__thumb" aria-hidden="true">
+                  <img [src]="exercise.image" alt="" loading="lazy" decoding="async" />
+                </span>
+              }
               <span class="pick-row__name">{{ exercise.name }}</span>
               @if (isAdded(exercise.id)) {
                 <span class="badge">Añadido</span>
