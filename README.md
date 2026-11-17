@@ -14,7 +14,7 @@ Aplicación móvil desarrollada con **Angular 20** y empaquetada como app nativa
 | Estilos | SCSS con design tokens | — |
 | Tests unitarios | Jasmine + Karma | ~5.9.0 / ~6.4.0 |
 
-## Pantallas del MVP
+## Pantallas
 
 Tema visual azul (azul marino profundo → azul vivo, superficies azul claro). Todas las pantallas están pensadas para móvil y se limitan a un ancho máximo de 520 px.
 
@@ -24,10 +24,10 @@ Tema visual azul (azul marino profundo → azul vivo, superficies azul claro). T
 | `/configurar` | Configuración | Días de entrenamiento (`LUNES, MIÉRCOLES y VIERNES`), **Borrar** y la lista de rutinas por día con su resumen |
 | `/configurar/dias` | Días | Pregunta cuántos días entrenar y permite marcar `L M X J V S D` en selección múltiple |
 | `/configurar/rutinas/:day` | Rutina del día | Chips `L M X J V S D` para cambiar de día; la rutina arranca vacía y se van sumando ejercicios con sus series |
-| `/configurar/rutinas/:day/agregar` | Añadir ejercicios | Catálogo agrupado en **CORE**, **PIERNAS** y **BRAZOS** con selección múltiple; los ya añadidos aparecen deshabilitados |
+| `/configurar/rutinas/:day/agregar` | Añadir ejercicios | Catálogo agrupado en **CORE**, **PIERNAS**, **BRAZOS** y **ESPALDA**, con la miniatura de la máquina; los ya añadidos aparecen deshabilitados |
 | `/entrenar` | Entrenar | Días del plan con sus ejercicios y series, con el día actual preseleccionado y botón **Empezar** |
 | `/entrenar/:day` | Rutina del día | Ejercicios del día agrupados por bloque, con progreso de series registradas y aviso cuando el día está vacío; **Terminar día** guarda la sesión en el histórico |
-| `/entrenar/:day/:exerciseId` | Registro | Series con check, número, pastilla de kg y pastilla de reps; serie hecha en verde, `‹ ›` para cambiar reps (±1) y kg (±2,5), y `+ Añadir una serie` para series extra |
+| `/entrenar/:day/:exerciseId` | Registro | Series con check, número, pastilla de kg y pastilla de reps; serie hecha en verde, `‹ ›` para cambiar reps (±1) y kg (±2,5), y `+ Añadir una serie` para series extra. Cada serie arranca con el valor de esa misma serie en la última sesión registrada, y cambiar kg o reps copia el valor a las series siguientes que todavía estén pendientes |
 | `/progreso` | Progreso | Tira de la semana (número 1–7, foco del día, check si se completó) y una tarjeta por sesión terminada con `kg × reps` de cada ejercicio |
 
 ### Flujo
@@ -58,17 +58,13 @@ tirones de espalda (jalón al pecho y remo sentado).
 
 - La pantalla de registro (`/entrenar/:day/:exerciseId`) muestra la imagen en una tarjeta blanca
   entre la barra de progreso y la lista de series.
-- Si el ejercicio no tiene `image`, la tarjeta **no se renderiza** (sin huecos ni imágenes roscas).
-- Hoy usan imagen: `core-contractora`, `core-press-pecho`, `core-press-banca`,
-  `brazos-press-hombros`, `brazos-deltoides-posterior`, `brazos-jalon-triceps`,
-  `espalda-jalon-pecho`, `espalda-remo-sentado`, `piernas-extension`, `piernas-abduccion`,
-  `piernas-cadera` y `brazos-curl-barra`: los doce renders en uso.
+- La pantalla de añadir ejercicios (`/configurar/rutinas/:day/agregar`) muestra la misma imagen como
+  miniatura de 64 × 64 px entre el check y el nombre, cargada con `loading="lazy"`.
+- Si el ejercicio no tiene `image`, ni la tarjeta ni la miniatura se renderizan (sin huecos).
+- Los 35 ejercicios del catálogo tienen render. Algunos comparten asset porque son la misma máquina:
+  cinco usan `floor-mat`, cinco `multi-gym`, tres `dumbbell-rack` y dos `flat-bench`.
 - Los assets se generan con `scripts/prepare-exercise-images.py <origen> <destino>`, que recorta el
   render, limpia el fondo de estudio y exporta el WebP de 720 px sobre blanco.
-- El catálogo tiene 30 ejercicios; 12 tienen render y el resto se muestran sin imagen (la tarjeta
-  simplemente no aparece).
-- La multiestación (`multi-gym.webp`) queda como asset sin usar: es una **máquina**, no un ejercicio,
-  así que no está en el catálogo.
 
 ### Progreso
 - **Terminar día** toma las series completadas de ese día, las guarda como una **sesión con fecha**
@@ -83,7 +79,7 @@ tirones de espalda (jalón al pecho y remo sentado).
 
 ### Persistencia
 
-El MVP no usa backend: los datos viven en **SQLite** (`@capacitor-community/sqlite`), en la base
+La app no usa backend: los datos viven en **SQLite** (`@capacitor-community/sqlite`), en la base
 `rutigym`. El esquema (`src/app/core/data/sqlite.service.ts`) es relacional, una tabla por concepto:
 
 | Tabla | Contenido |
@@ -91,7 +87,7 @@ El MVP no usa backend: los datos viven en **SQLite** (`@capacitor-community/sqli
 | `plan_day` | días configurados, con su posición |
 | `routine_item` | ejercicios de cada rutina, con series y orden |
 | `set_log` | registro activo de series por día y ejercicio (`reps`, `kg`, `done`) |
-| `last_value` | últimos reps/kg por ejercicio, para precargar la próxima sesión |
+| `last_value` | últimos reps/kg por ejercicio, como respaldo cuando no hay sesión previa |
 | `workout_session` / `session_set` | sesiones terminadas y el snapshot de sus series |
 | `app_meta` | marcas internas (`legacy_migrated`, `demo_seeded`) |
 
