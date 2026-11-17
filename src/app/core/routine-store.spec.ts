@@ -93,7 +93,7 @@ describe('RoutineStore', () => {
     expect(sets.every((entry) => entry.reps === 10 && entry.kg === 20 && !entry.done)).toBeTrue();
   });
 
-  it('seeds a new session with the last values logged for that exercise', () => {
+  it('seeds every series with the values of the same series in the last recorded session', () => {
     store.savePlan(['mon', 'wed']);
     store.addExercise('mon', 'core-plancha', 2);
     store.addExercise('wed', 'core-plancha', 2);
@@ -105,9 +105,130 @@ describe('RoutineStore', () => {
     const sets = store.setsFor('wed', 'core-plancha');
 
     expect(sets.map((entry) => ({ reps: entry.reps, kg: entry.kg }))).toEqual([
-      { reps: 12, kg: 30 },
+      { reps: 14, kg: 32.5 },
       { reps: 12, kg: 30 },
     ]);
+    expect(sets.every((entry) => !entry.done)).toBeTrue();
+  });
+
+  it('seeds a new workout with the series of the last finished session', () => {
+    store.savePlan(['wed']);
+    store.addExercise('wed', 'piernas-prensa', 3);
+    store.saveSets('wed', 'piernas-prensa', [
+      { reps: 12, kg: 80, done: true },
+      { reps: 10, kg: 85, done: true },
+      { reps: 8, kg: 90, done: true },
+    ]);
+    store.finishDay('wed', new Date(2026, 10, 11));
+
+    const sets = store.setsFor('wed', 'piernas-prensa');
+
+    expect(sets.map((entry) => ({ reps: entry.reps, kg: entry.kg, done: entry.done }))).toEqual([
+      { reps: 12, kg: 80, done: false },
+      { reps: 10, kg: 85, done: false },
+      { reps: 8, kg: 90, done: false },
+    ]);
+  });
+
+  it('seeds from the newest session that recorded the exercise', () => {
+    store.savePlan(['wed']);
+    store.addExercise('wed', 'piernas-prensa', 1);
+    store.saveSets('wed', 'piernas-prensa', [{ reps: 12, kg: 70, done: true }]);
+    store.finishDay('wed', new Date(2026, 10, 4));
+    store.saveSets('wed', 'piernas-prensa', [{ reps: 10, kg: 90, done: true }]);
+    store.finishDay('wed', new Date(2026, 10, 11));
+
+    expect(store.setsFor('wed', 'piernas-prensa')[0]).toEqual({ reps: 10, kg: 90, done: false });
+  });
+
+  it('repeats the last recorded series when the plan asks for more series', () => {
+    store.savePlan(['wed']);
+    store.addExercise('wed', 'piernas-prensa', 2);
+    store.saveSets('wed', 'piernas-prensa', [
+      { reps: 12, kg: 80, done: true },
+      { reps: 10, kg: 85, done: true },
+    ]);
+    store.finishDay('wed', new Date(2026, 10, 11));
+
+    store.setSeries('wed', 'piernas-prensa', 4);
+
+    expect(
+      store.setsFor('wed', 'piernas-prensa').map((entry) => ({ reps: entry.reps, kg: entry.kg })),
+    ).toEqual([
+      { reps: 12, kg: 80 },
+      { reps: 10, kg: 85 },
+      { reps: 10, kg: 85 },
+      { reps: 10, kg: 85 },
+    ]);
+  });
+
+  it('copies the weight of a series to the following pending series', () => {
+    store.savePlan(['mon']);
+    store.addExercise('mon', 'core-plancha', 3);
+
+    store.updateSet('mon', 'core-plancha', 0, { kg: 30 });
+
+    expect(store.setsFor('mon', 'core-plancha').map((entry) => entry.kg)).toEqual([30, 30, 30]);
+  });
+
+  it('copies the reps of a series to the following pending series', () => {
+    store.savePlan(['mon']);
+    store.addExercise('mon', 'core-plancha', 3);
+
+    store.updateSet('mon', 'core-plancha', 0, { reps: 12 });
+
+    expect(store.setsFor('mon', 'core-plancha').map((entry) => entry.reps)).toEqual([12, 12, 12]);
+  });
+
+  it('only copies the values that changed', () => {
+    store.savePlan(['mon']);
+    store.addExercise('mon', 'core-plancha', 2);
+    store.saveSets('mon', 'core-plancha', [
+      { reps: 8, kg: 20, done: false },
+      { reps: 12, kg: 20, done: false },
+    ]);
+
+    store.updateSet('mon', 'core-plancha', 0, { kg: 30 });
+
+    expect(
+      store.setsFor('mon', 'core-plancha').map((entry) => ({ reps: entry.reps, kg: entry.kg })),
+    ).toEqual([
+      { reps: 8, kg: 30 },
+      { reps: 12, kg: 30 },
+    ]);
+  });
+
+  it('keeps a completed series with the values it was logged with', () => {
+    store.savePlan(['mon']);
+    store.addExercise('mon', 'core-plancha', 3);
+    store.saveSets('mon', 'core-plancha', [
+      { reps: 10, kg: 30, done: true },
+      { reps: 10, kg: 20, done: true },
+      { reps: 10, kg: 20, done: false },
+    ]);
+
+    store.updateSet('mon', 'core-plancha', 0, { kg: 25 });
+
+    expect(store.setsFor('mon', 'core-plancha').map((entry) => entry.kg)).toEqual([25, 20, 25]);
+  });
+
+  it('does not copy a change to the series before it', () => {
+    store.savePlan(['mon']);
+    store.addExercise('mon', 'core-plancha', 3);
+
+    store.updateSet('mon', 'core-plancha', 2, { kg: 40 });
+
+    expect(store.setsFor('mon', 'core-plancha').map((entry) => entry.kg)).toEqual([20, 20, 40]);
+  });
+
+  it('ignores the demo history when seeding a real workout', () => {
+    store.ensureDemoHistory(new Date(2026, 10, 11));
+    store.savePlan(['wed']);
+    store.addExercise('wed', 'piernas-prensa', 3);
+
+    const sets = store.setsFor('wed', 'piernas-prensa');
+
+    expect(sets.every((entry) => entry.reps === 10 && entry.kg === 20)).toBeTrue();
   });
 
   it('allows extra series beyond the configured ones and keeps them', async () => {

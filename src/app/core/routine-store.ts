@@ -42,6 +42,7 @@ const LEGACY_MIGRATED_META = 'legacy_migrated';
 const DEMO_SEEDED_META = 'demo_seeded';
 
 type LastValues = Readonly<Record<string, ExerciseValues>>;
+type LastSets = Readonly<Record<string, readonly SetEntry[]>>;
 
 interface LegacyData {
   readonly days: readonly DayKey[];
@@ -280,22 +281,59 @@ export class RoutineStore {
   }
 
   /**
-   * Planned series plus any extra series added in this session, seeded from what the user
-   * already logged — otherwise from the last values of that exercise, otherwise 10 reps / 20 kg.
+   * Planned series plus any extra series added in this session. Each series is seeded from the
+   * same position of the last occasion that recorded that exercise, so a progressive session
+   * starts where the previous one ended; series beyond it repeat the last recorded one. Falls back
+   * to the last values of that exercise and then to 10 reps / 20 kg.
    */
   setsFor(day: DayKey, exerciseId: string): SetEntry[] {
     const stored = this.logsState()[day]?.[exerciseId] ?? [];
     const total = Math.max(this.seriesFor(day, exerciseId), stored.length);
-    const seed = this.lastValuesFor(exerciseId);
+    const previous = this.previousSetsFor(day, exerciseId);
+    const fallback: ExerciseValues =
+      stored[stored.length - 1] ?? previous[previous.length - 1] ?? this.lastValuesFor(exerciseId);
 
     return Array.from({ length: total }, (_, index) => {
       const entry = stored[index];
-      return {
-        reps: entry ? clampReps(entry.reps) : seed.reps,
-        kg: entry ? clampKg(entry.kg) : seed.kg,
-        done: entry?.done ?? false,
-      };
+      if (entry) {
+        return { reps: clampReps(entry.reps), kg: clampKg(entry.kg), done: entry.done };
+      }
+      const seed = previous[index] ?? fallback;
+      return { reps: clampReps(seed.reps), kg: clampKg(seed.kg), done: false };
     });
+  }
+
+  /**
+   * Applies a change to one series and copies the changed weights or reps to the following pending
+   * series; a series already marked as done keeps the values it was logged with.
+   */
+  updateSet(
+    day: DayKey,
+    exerciseId: string,
+    index: number,
+    changes: Partial<ExerciseValues>,
+  ): void {
+    const current = this.setsFor(day, exerciseId);
+    if (!current[index]) {
+      return;
+    }
+
+    const kg = changes.kg === undefined ? undefined : clampKg(changes.kg);
+    const reps = changes.reps === undefined ? undefined : clampReps(changes.reps);
+
+    this.saveSets(
+      day,
+      exerciseId,
+      current.map((entry, position) => {
+        if (position === index) {
+          return { reps: reps ?? entry.reps, kg: kg ?? entry.kg, done: entry.done };
+        }
+        if (position > index && !entry.done) {
+          return { reps: reps ?? entry.reps, kg: kg ?? entry.kg, done: entry.done };
+        }
+        return entry;
+      }),
+    );
   }
 
   /** Appends one extra series to the session log of that exercise. */
@@ -307,6 +345,28 @@ export class RoutineStore {
       ...current,
       { reps: clampReps(seed.reps), kg: clampKg(seed.kg), done: false },
     ]);
+  }
+
+  /**
+   * Series of the last occasion that recorded that exercise, in order: the newest finished session
+   * that includes it, then the active log of another day, then nothing. The open log of `day` is
+   * not a previous occasion: those entries are already the stored ones.
+   */
+  private previousSetsFor(day: DayKey, exerciseId: string): readonly SetEntry[] {
+    const logged = this.lastSetsByExercise()[exerciseId];
+    if (logged) {
+      return logged;
+    }
+
+    const logs = this.logsState();
+    for (const other of DAY_ORDER) {
+      const entries = other === day ? undefined : logs[other]?.[exerciseId];
+      if (entries && entries.length > 0) {
+        return entries;
+      }
+    }
+
+    return [];
   }
 
   saveSets(day: DayKey, exerciseId: string, entries: readonly SetEntry[]): void {
@@ -376,6 +436,29 @@ export class RoutineStore {
       return DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day);
     }),
   );
+
+  /**
+   * Series of the newest real session that recorded each exercise, indexed by exercise.
+   * Demo sessions are ignored: they only exist to populate the progress screen.
+   */
+  private readonly lastSetsByExercise = computed<LastSets>(() => {
+    const latest: Record<string, readonly SetEntry[]> = {};
+    for (const session of this.sessions()) {
+      if (session.demo) {
+        continue;
+      }
+      for (const exercise of session.exercises) {
+        if (exercise.sets.length === 0) {
+          continue;
+        }
+        const known = latest[exercise.exerciseId];
+        if (!known) {
+          latest[exercise.exerciseId] = exercise.sets;
+        }
+      }
+    }
+    return latest;
+  });
 
   /**
    * Snapshots the completed series of that day as a dated session and clears the active log.

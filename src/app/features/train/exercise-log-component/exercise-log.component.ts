@@ -5,6 +5,7 @@ import { exerciseById } from '../../../core/exercise-catalog';
 import {
   DAY_ORDER,
   DayKey,
+  ExerciseValues,
   KG_STEP,
   REPS_STEP,
   SetEntry,
@@ -59,11 +60,11 @@ export class ExerciseLogComponent {
   }
 
   protected adjustReps(index: number, direction: -1 | 1): void {
-    this.patch(index, { reps: clampReps(this.entries()[index].reps + direction * REPS_STEP) });
+    this.update(index, { reps: clampReps(this.entries()[index].reps + direction * REPS_STEP) });
   }
 
   protected adjustKg(index: number, direction: -1 | 1): void {
-    this.patch(index, { kg: clampKg(this.entries()[index].kg + direction * KG_STEP) });
+    this.update(index, { kg: clampKg(this.entries()[index].kg + direction * KG_STEP) });
   }
 
   protected addSeries(): void {
@@ -83,6 +84,13 @@ export class ExerciseLogComponent {
     const index = routine.indexOf(this.exerciseId());
     const nextId = index >= 0 ? routine[index + 1] : undefined;
     void this.router.navigate(nextId ? ['/entrenar', day, nextId] : ['/entrenar', day]);
+  }
+
+  private update(index: number, changes: Partial<ExerciseValues>): void {
+    const day = this.dayKey();
+    if (day) {
+      this.store.updateSet(day, this.exerciseId(), index, changes);
+    }
   }
 
   private patch(index: number, changes: Partial<SetEntry>): void {

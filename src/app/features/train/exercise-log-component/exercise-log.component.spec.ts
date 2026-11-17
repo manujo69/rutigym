@@ -67,6 +67,40 @@ describe('ExerciseLogComponent', () => {
     expect(store.setsFor('mon', 'core-plancha')[0].kg).toBe(22.5);
   });
 
+  it('copies a weight change to the following series', () => {
+    build();
+
+    const arrows = fixture.nativeElement.querySelectorAll('.set .set__arrow');
+    arrows[1].click();
+    fixture.detectChanges();
+
+    expect(store.setsFor('mon', 'core-plancha').map((entry) => entry.kg)).toEqual([
+      22.5, 22.5, 22.5,
+    ]);
+  });
+
+  it('shows the series of the last session when the exercise is opened again', () => {
+    store.saveSets('mon', 'core-plancha', [
+      { reps: 20, kg: 0, done: true },
+      { reps: 18, kg: 0, done: true },
+      { reps: 16, kg: 0, done: true },
+    ]);
+    store.finishDay('mon');
+
+    build();
+
+    const rows = [...fixture.nativeElement.querySelectorAll('.set')] as HTMLElement[];
+    const values = rows.map((row) =>
+      [...row.querySelectorAll('.set__value')].map((element) => element.textContent?.trim()),
+    );
+
+    expect(values).toEqual([
+      ['0', '20'],
+      ['0', '18'],
+      ['0', '16'],
+    ]);
+  });
+
   it('adds an extra series beyond the configured ones', () => {
     build();
 
