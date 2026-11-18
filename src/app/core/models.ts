@@ -1,6 +1,6 @@
 export type DayKey = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
-export type ExerciseGroup = 'CORE' | 'PIERNAS' | 'BRAZOS' | 'ESPALDA';
+export type ExerciseGroup = 'CORE' | 'PIERNAS' | 'BRAZOS' | 'ESPALDA' | 'PECHO' | 'HOMBRO';
 
 export interface Exercise {
   readonly id: string;
@@ -8,6 +8,10 @@ export interface Exercise {
   readonly group: ExerciseGroup;
   /** Machine illustration served from `public/exercises/`. Omitted when there is no photo. */
   readonly image?: string;
+  /** Muscles of the diagram (`data-muscle` names) that the exercise works. */
+  readonly muscles?: readonly string[];
+  /** Display names for the work, when the diagram lacks that exact muscle. */
+  readonly names?: readonly string[];
 }
 
 export interface PlannedExercise {

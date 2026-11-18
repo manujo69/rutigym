@@ -52,17 +52,17 @@ catálogo los referencia con el campo `image`:
   image: '/exercises/chest-press.webp' },
 ```
 
-Los grupos son deliberadamente amplios: **CORE** incluye los ejercicios de pecho y **BRAZOS** los de
-hombro; no hay grupos separados de PECHO ni HOMBRO. **ESPALDA** es un grupo propio y agrupa los
-tirones de espalda (jalón al pecho y remo sentado).
+El catálogo usa seis grupos: **CORE**, **PIERNAS**, **BRAZOS**, **ESPALDA**, **PECHO** y **HOMBRO**.
+Pecho y hombro tienen grupo propio porque suman seis y nueve ejercicios respectivamente; dentro de
+PIERNAS conviven glúteo y gemelo, y dentro de BRAZOS el antebrazo.
 
 - La pantalla de registro (`/entrenar/:day/:exerciseId`) muestra la imagen en una tarjeta blanca
   entre la barra de progreso y la lista de series.
 - La pantalla de añadir ejercicios (`/configurar/rutinas/:day/agregar`) muestra la misma imagen como
   miniatura de 64 × 64 px entre el check y el nombre, cargada con `loading="lazy"`.
 - Si el ejercicio no tiene `image`, ni la tarjeta ni la miniatura se renderizan (sin huecos).
-- Los 35 ejercicios del catálogo tienen render. Algunos comparten asset porque son la misma máquina:
-  cinco usan `floor-mat`, cinco `multi-gym`, tres `dumbbell-rack` y dos `flat-bench`.
+- Los 88 ejercicios del catálogo tienen render. Algunos comparten asset porque son la misma
+  máquina o el mismo material: `floor-mat` y `bench-dumbbell` son los más reutilizados.
 - Los assets se generan con `scripts/prepare-exercise-images.py <origen> <destino>`, que recorta el
   render, limpia el fondo de estudio y exporta el WebP de 720 px sobre blanco.
 
