@@ -83,7 +83,7 @@
   <div class="card">
     <span class="eyebrow">Copia de seguridad</span>
     <p class="muted">
-      Llevá tu plan y tu historial de un dispositivo a otro: copiá el texto acá y pegalo en el otro.
+      Lleva tu plan y tu historial de un dispositivo a otro: copia el texto aquí y pégalo en el otro.
     </p>
 
     @if (backupText()) {
@@ -96,7 +96,7 @@
       <textarea
         class="config__textarea"
         rows="6"
-        placeholder="Pegá aquí la copia"
+        placeholder="Pega aquí la copia"
         [value]="importText()"
         (input)="importText.set($any($event.target).value)"
       ></textarea>

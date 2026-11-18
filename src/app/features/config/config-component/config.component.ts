@@ -38,7 +38,7 @@ export class ConfigComponent {
       this.backupText.set(json);
       this.message.set({
         kind: 'error',
-        text: 'No se pudo usar el portapapeles. Copiá el texto de abajo.',
+        text: 'No se pudo usar el portapapeles. Copia el texto de abajo.',
       });
     }
   }
