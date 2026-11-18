@@ -29,6 +29,16 @@
     @if (heroImage()) {
       <figure class="exercise-hero">
         <img [src]="heroImage()" [alt]="'Máquina: ' + exercise()?.name" />
+        @if (muscles().length > 0) {
+          <span class="exercise-hero__map">
+            <app-muscle-map class="exercise-hero__figure" [muscles]="muscles()" />
+          </span>
+          <ul class="exercise-hero__tag">
+            @for (label of labels(); track $index) {
+              <li>{{ label }}</li>
+            }
+          </ul>
+        }
       </figure>
     }
 

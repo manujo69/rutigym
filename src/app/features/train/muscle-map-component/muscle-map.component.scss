@@ -1,0 +1,19 @@
+:host {
+  display: block;
+  color: var(--muscle-highlight, #ef3b3b);
+}
+
+.muscle-map__figure {
+  display: block;
+  line-height: 0;
+}
+
+.muscle-map__figure ::ng-deep svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.muscle-map__figure ::ng-deep path[data-muscle] {
+  transition: fill 0.18s ease;
+}

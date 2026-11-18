@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { Router, RouterLink } from '@angular/router';
 
 import { exerciseById } from '../../../core/exercise-catalog';
+import { muscleName } from '../../../core/muscle-names';
 import {
   DAY_ORDER,
   DayKey,
@@ -13,11 +14,12 @@ import {
   clampReps,
 } from '../../../core/models';
 import { RoutineStore } from '../../../core/routine-store';
+import { MuscleMapComponent } from '../muscle-map-component/muscle-map.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-exercise-log',
-  imports: [RouterLink],
+  imports: [RouterLink, MuscleMapComponent],
   templateUrl: './exercise-log.component.html',
   styleUrl: './exercise-log.component.scss',
 })
@@ -34,6 +36,12 @@ export class ExerciseLogComponent {
   });
   protected readonly exercise = computed(() => exerciseById(this.exerciseId()));
   protected readonly heroImage = computed(() => this.exercise()?.image ?? null);
+  protected readonly muscles = computed(() => this.exercise()?.muscles ?? []);
+  /** One label per worked muscle: the exercise can override them for precision. */
+  protected readonly labels = computed(() => {
+    const names = this.exercise()?.names;
+    return names && names.length > 0 ? names : this.muscles().map(muscleName);
+  });
   protected readonly planned = computed(() => {
     const day = this.dayKey();
     return !!day && this.store.isPlanned(day, this.exerciseId());

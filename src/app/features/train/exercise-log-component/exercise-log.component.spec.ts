@@ -19,6 +19,8 @@ describe('ExerciseLogComponent', () => {
   }
 
   beforeEach(async () => {
+    spyOn(window, 'fetch').and.resolveTo(new Response('<svg viewBox="0 0 10 10"></svg>'));
+
     TestBed.configureTestingModule({
       imports: [ExerciseLogComponent],
       providers: [
@@ -55,6 +57,29 @@ describe('ExerciseLogComponent', () => {
 
     expect(store.progressFor('mon', 'core-plancha')).toEqual({ done: 1, total: 3 });
     expect(fixture.nativeElement.querySelector('.log__count').textContent).toContain('1/3');
+  });
+
+  it('lists the worked muscles of the exercise', () => {
+    build();
+
+    const items = [...fixture.nativeElement.querySelectorAll('.exercise-hero__tag li')].map(
+      (item: HTMLElement) => item.textContent?.trim(),
+    );
+
+    expect(items).toEqual(['Abdominales', 'Oblicuos']);
+  });
+
+  it('shows the precise muscle names when the diagram lacks that muscle', () => {
+    store.addExercise('mon', 'piernas-abduccion', 3);
+    build();
+    fixture.componentRef.setInput('exerciseId', 'piernas-abduccion');
+    fixture.detectChanges();
+
+    const items = [...fixture.nativeElement.querySelectorAll('.exercise-hero__tag li')].map(
+      (item: HTMLElement) => item.textContent?.trim(),
+    );
+
+    expect(items).toEqual(['Glúteo medio', 'Tensor de la fascia lata']);
   });
 
   it('changes the kg of a series with the arrows', () => {
