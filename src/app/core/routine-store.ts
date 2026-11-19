@@ -40,6 +40,7 @@ const LEGACY_SESSIONS_KEY = 'rutigym.sessions.v1';
 const LEGACY_DEMO_KEY = 'rutigym.demo-seeded.v1';
 const LEGACY_MIGRATED_META = 'legacy_migrated';
 const DEMO_SEEDED_META = 'demo_seeded';
+const LOGS_WEEK_META = 'logs_week';
 
 type LastValues = Readonly<Record<string, ExerciseValues>>;
 type LastSets = Readonly<Record<string, readonly SetEntry[]>>;
@@ -98,6 +99,7 @@ export class RoutineStore {
   private readonly sessionsState = signal<readonly WorkoutSession[]>([]);
   private readonly draftDaysState = signal<readonly DayKey[] | null>(null);
   private readonly demoSeededState = signal(false);
+  private logsWeek: string | null = null;
   private initialized = false;
 
   readonly plan = this.planState.asReadonly();
@@ -138,6 +140,7 @@ export class RoutineStore {
     }
 
     this.loadState(snapshot);
+    this.resetLogsIfNewWeek();
     this.initialized = true;
   }
 
@@ -461,23 +464,23 @@ export class RoutineStore {
   });
 
   /**
-   * Snapshots the completed series of that day as a dated session and clears the active log.
+   * Snapshots the completed series of that day as a dated session. The series stay in the active
+   * log so the day keeps showing what was done this week; they are cleared when the week changes.
    * A day without any completed series records nothing.
    */
   finishDay(day: DayKey, reference: Date = new Date()): void {
-    const exercises: SessionExercise[] = this.routinesFor(day)
-      .map((item) => ({ exerciseId: item.exerciseId, sets: this.setsFor(day, item.exerciseId) }))
-      .filter((item) => item.sets.some((set) => set.done));
+    // La semana se cierra con el reloj real, no con la fecha que se pase para registrar.
+    this.resetLogsIfNewWeek();
 
-    if (exercises.length === 0) {
+    const session = this.snapshotDay(day, toIsoDate(reference));
+    if (!session) {
       return;
     }
 
-    const date = toIsoDate(reference);
-    const id = `${date}-${day}`;
-    const session: WorkoutSession = { id, date, day, exercises };
-    this.persistSessions([...this.sessionsState().filter((item) => item.id !== id), session]);
-    this.clearDayLogs(day);
+    this.persistSessions([
+      ...this.sessionsState().filter((item) => item.id !== session.id),
+      session,
+    ]);
   }
 
   /** The seven days of the week that contains `reference`, with their state. */
@@ -602,6 +605,7 @@ export class RoutineStore {
     this.lastValuesState.set(snapshot.lastValues);
     this.sessionsState.set(snapshot.sessions);
     this.demoSeededState.set(snapshot.meta[DEMO_SEEDED_META] === '1');
+    this.logsWeek = snapshot.meta[LOGS_WEEK_META] ?? null;
   }
 
   private isBlank(snapshot: RoutineSnapshot): boolean {
@@ -664,11 +668,50 @@ export class RoutineStore {
     this.persist(() => this.repository.saveRoutine(day, routine));
   }
 
-  private clearDayLogs(day: DayKey): void {
-    const logs: Record<string, unknown> = { ...this.logsState() };
-    delete logs[day];
-    this.logsState.set(logs as SessionLogs);
-    this.persist(() => this.repository.deleteDayLogs(day));
+  /** Completed series of a day as a dated session, or null when nothing was done. */
+  private snapshotDay(day: DayKey, date: string): WorkoutSession | null {
+    const exercises: SessionExercise[] = this.routinesFor(day)
+      .map((item) => ({ exerciseId: item.exerciseId, sets: this.setsFor(day, item.exerciseId) }))
+      .filter((item) => item.sets.some((set) => set.done));
+
+    return exercises.length > 0 ? { id: `${date}-${day}`, date, day, exercises } : null;
+  }
+
+  /**
+   * Clears the active logs when the calendar moved to another week. Days that still hold completed
+   * series are recorded first, dated with the day they belong to, so nothing is lost.
+   */
+  private resetLogsIfNewWeek(reference: Date = new Date()): void {
+    const monday = toIsoDate(startOfWeek(reference));
+    if (this.logsWeek === monday) {
+      return;
+    }
+
+    const previous = this.logsWeek;
+    this.logsWeek = monday;
+    this.persist(() => this.repository.setMeta(LOGS_WEEK_META, monday));
+
+    // Sin semana previa conocida (primera ejecución tras actualizar) no se borra nada.
+    if (!previous) {
+      return;
+    }
+
+    const start = new Date(`${previous}T00:00:00`);
+    const pending = DAY_ORDER.map((day) =>
+      this.snapshotDay(day, toIsoDate(addDays(start, DAY_ORDER.indexOf(day)))),
+    ).filter((session): session is WorkoutSession => session !== null);
+    if (pending.length > 0) {
+      const ids = new Set(pending.map((session) => session.id));
+      this.persistSessions([
+        ...this.sessionsState().filter((session) => !ids.has(session.id)),
+        ...pending,
+      ]);
+    }
+
+    this.logsState.set({});
+    for (const day of DAY_ORDER) {
+      this.persist(() => this.repository.deleteDayLogs(day));
+    }
   }
 
   private persistSessions(sessions: readonly WorkoutSession[]): void {

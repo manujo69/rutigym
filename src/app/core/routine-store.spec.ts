@@ -111,7 +111,7 @@ describe('RoutineStore', () => {
     expect(sets.every((entry) => !entry.done)).toBeTrue();
   });
 
-  it('seeds a new workout with the series of the last finished session', () => {
+  it('seeds a new workout with the series of the last finished session', async () => {
     store.savePlan(['wed']);
     store.addExercise('wed', 'piernas-prensa', 3);
     store.saveSets('wed', 'piernas-prensa', [
@@ -121,7 +121,11 @@ describe('RoutineStore', () => {
     ]);
     store.finishDay('wed', new Date(2026, 10, 11));
 
-    const sets = store.setsFor('wed', 'piernas-prensa');
+    await TestBed.inject(ROUTINE_REPOSITORY).setMeta('logs_week', '2026-10-26');
+    const reloaded = TestBed.runInInjectionContext(() => new RoutineStore());
+    await reloaded.init();
+
+    const sets = reloaded.setsFor('wed', 'piernas-prensa');
 
     expect(sets.map((entry) => ({ reps: entry.reps, kg: entry.kg, done: entry.done }))).toEqual([
       { reps: 12, kg: 80, done: false },
@@ -130,7 +134,7 @@ describe('RoutineStore', () => {
     ]);
   });
 
-  it('seeds from the newest session that recorded the exercise', () => {
+  it('seeds from the newest session that recorded the exercise', async () => {
     store.savePlan(['wed']);
     store.addExercise('wed', 'piernas-prensa', 1);
     store.saveSets('wed', 'piernas-prensa', [{ reps: 12, kg: 70, done: true }]);
@@ -138,7 +142,16 @@ describe('RoutineStore', () => {
     store.saveSets('wed', 'piernas-prensa', [{ reps: 10, kg: 90, done: true }]);
     store.finishDay('wed', new Date(2026, 10, 11));
 
-    expect(store.setsFor('wed', 'piernas-prensa')[0]).toEqual({ reps: 10, kg: 90, done: false });
+    // Con los registros activos todavía en pantalla no hay siembra; la semana siguiente sí.
+    await TestBed.inject(ROUTINE_REPOSITORY).setMeta('logs_week', '2026-10-26');
+    const reloaded = TestBed.runInInjectionContext(() => new RoutineStore());
+    await reloaded.init();
+
+    expect(reloaded.setsFor('wed', 'piernas-prensa')[0]).toEqual({
+      reps: 10,
+      kg: 90,
+      done: false,
+    });
   });
 
   it('repeats the last recorded series when the plan asks for more series', () => {
@@ -344,7 +357,7 @@ describe('RoutineStore', () => {
       expect(store.sessions()).toEqual([]);
     });
 
-    it('clears only the active log of the finished day', () => {
+    it('keeps the active log after finishing the day', () => {
       store.savePlan(['mon', 'wed']);
       store.addExercise('mon', 'core-plancha', 1);
       store.addExercise('wed', 'piernas-prensa', 1);
@@ -353,8 +366,24 @@ describe('RoutineStore', () => {
 
       store.finishDay('wed', wednesday);
 
-      expect(store.setsFor('wed', 'piernas-prensa').every((entry) => !entry.done)).toBeTrue();
+      expect(store.setsFor('wed', 'piernas-prensa')[0]).toEqual({ reps: 10, kg: 70, done: true });
       expect(store.setsFor('mon', 'core-plancha').some((entry) => entry.done)).toBeTrue();
+    });
+
+    it('clears the active logs when the calendar moves to another week', async () => {
+      store.savePlan(['mon', 'wed']);
+      store.addExercise('wed', 'piernas-prensa', 1);
+      store.saveSets('wed', 'piernas-prensa', [{ reps: 10, kg: 70, done: true }]);
+
+      const repository = TestBed.inject(ROUTINE_REPOSITORY);
+      await repository.setMeta('logs_week', '2026-10-26');
+
+      const reloaded = TestBed.runInInjectionContext(() => new RoutineStore());
+      await reloaded.init();
+
+      expect(reloaded.setsFor('wed', 'piernas-prensa')[0].done).toBeFalse();
+      expect(reloaded.setsFor('wed', 'piernas-prensa')[0].kg).toBe(70);
+      expect(reloaded.sessions().some((session) => session.date === '2026-10-28')).toBeTrue();
     });
 
     it('marks completed, planned and rest days of the current week', () => {
