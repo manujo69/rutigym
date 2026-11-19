@@ -28,7 +28,9 @@
 
     @if (heroImage()) {
       <figure class="exercise-hero">
-        <img [src]="heroImage()" [alt]="'Máquina: ' + exercise()?.name" />
+        <span class="exercise-hero__frame">
+          <img [src]="heroImage()" [alt]="'Máquina: ' + exercise()?.name" />
+        </span>
         @if (muscles().length > 0) {
           <span class="exercise-hero__map">
             <app-muscle-map class="exercise-hero__figure" [muscles]="muscles()" />

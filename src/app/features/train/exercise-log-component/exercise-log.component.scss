@@ -42,15 +42,20 @@
 
 .exercise-hero {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   margin: 2px 0 0;
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
   box-shadow: var(--shadow-card);
+}
+
+/* Máscara: la foto no puede salirse del rectángulo redondeado de la tarjeta. */
+.exercise-hero__frame {
+  display: block;
+  overflow: hidden;
+  border-radius: calc(var(--radius-lg) - 10px);
 }
 
 .exercise-hero__map {
@@ -100,7 +105,8 @@
 
 .exercise-hero img {
   display: block;
-  width: 100%;
+  width: 94%;
+  margin-inline: auto;
   max-height: 260px;
   border-radius: var(--radius-sm);
   object-fit: contain;
