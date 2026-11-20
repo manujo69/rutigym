@@ -61,7 +61,7 @@ PIERNAS conviven glúteo y gemelo, y dentro de BRAZOS el antebrazo.
 - La pantalla de añadir ejercicios (`/configurar/rutinas/:day/agregar`) muestra la misma imagen como
   miniatura de 64 × 64 px entre el check y el nombre, cargada con `loading="lazy"`.
 - Si el ejercicio no tiene `image`, ni la tarjeta ni la miniatura se renderizan (sin huecos).
-- Los 88 ejercicios del catálogo tienen render. Algunos comparten asset porque son la misma
+- Los 87 ejercicios del catálogo tienen render. Algunos comparten asset porque son la misma
   máquina o el mismo material: `floor-mat` y `bench-dumbbell` son los más reutilizados.
 - Los assets se generan con `scripts/prepare-exercise-images.py <origen> <destino>`, que recorta el
   render, limpia el fondo de estudio y exporta el WebP de 720 px sobre blanco.

@@ -236,7 +236,7 @@ export const EXERCISES: readonly Exercise[] = [
     id: 'espalda-remo-mancuerna',
     name: 'Remo a una mano',
     group: 'ESPALDA',
-    image: '/exercises/bench-dumbbell.webp',
+    image: '/exercises/axiom-seated-row.webp',
     muscles: ['dorsales', 'biceps'],
   },
   {
@@ -428,13 +428,6 @@ export const EXERCISES: readonly Exercise[] = [
     group: 'BRAZOS',
     image: '/exercises/ez-bar-rack.webp',
     muscles: ['biceps', 'antebrazos'],
-  },
-  {
-    id: 'brazos-triceps-atras',
-    name: 'Tirón hacia atrás de tríceps',
-    group: 'BRAZOS',
-    image: '/exercises/triceps-pushdown.webp',
-    muscles: ['triceps'],
   },
   {
     id: 'brazos-flexiones-diamante',
