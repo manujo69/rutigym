@@ -26,8 +26,20 @@ const BACK = new Set([
 
 export type MuscleView = 'front' | 'back';
 
-/** The view that shows more of the worked muscles; ties go to the front. */
+/**
+ * The view that shows the primary muscle. The catalog lists the main muscle first, so the view is
+ * chosen from it; secondary muscles never change the view. Without a recognisable primary the
+ * fallback is the view with more worked muscles, ties to the front.
+ */
 export function pickView(muscles: readonly string[]): MuscleView {
+  const primary = muscles[0];
+  if (primary && BACK.has(primary)) {
+    return 'back';
+  }
+  if (primary && FRONT.has(primary)) {
+    return 'front';
+  }
+
   const front = muscles.filter((muscle) => FRONT.has(muscle)).length;
   const back = muscles.filter((muscle) => BACK.has(muscle)).length;
   return back > front ? 'back' : 'front';

@@ -28,9 +28,15 @@ describe('MuscleMapComponent', () => {
     expect(pickView(['pecho', 'biceps'])).toBe('front');
   });
 
-  it('falls back to the front view on a tie', () => {
-    expect(pickView(['pecho', 'dorsales'])).toBe('front');
+  it('picks the view of the primary muscle, whatever the secondary ones are', () => {
+    expect(pickView(['dorsales', 'biceps'])).toBe('back');
+    expect(pickView(['biceps', 'dorsales'])).toBe('front');
+    expect(pickView(['pecho', 'triceps'])).toBe('front');
+  });
+
+  it('falls back to the front view when nothing identifies the primary', () => {
     expect(pickView([])).toBe('front');
+    expect(pickView(['desconocido'])).toBe('front');
   });
 
   it('only repaints the worked muscles', () => {
