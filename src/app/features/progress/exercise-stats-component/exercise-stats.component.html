@@ -1,0 +1,75 @@
+<div class="veil" (click)="close()"></div>
+
+<section class="sheet" role="dialog" aria-modal="true" [attr.aria-label]="exercise()?.name ?? 'Estadísticas'">
+  <span class="handle"></span>
+
+  <header class="sheet__head">
+    <div class="sheet__titles">
+      <span class="eyebrow">{{ exercise()?.group ?? 'Ejercicio' }}</span>
+      <h2 class="sheet__name">{{ exercise()?.name ?? exerciseId() }}</h2>
+    </div>
+    <button type="button" class="close" (click)="close()" aria-label="Cerrar estadísticas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <path d="M18 6L6 18M6 6l12 12" />
+      </svg>
+    </button>
+  </header>
+
+  <div class="metrics">
+    <div class="metric">
+      <span class="metric__value">{{ format(bestRm()) }} kg</span>
+      <span class="metric__label">Mejor 1 RM</span>
+    </div>
+    <div class="metric">
+      <span class="metric__value">{{ sessions() }}</span>
+      <span class="metric__label">Sesiones</span>
+    </div>
+    <div class="metric">
+      <span class="metric__value">{{ format(totalVolume()) }}</span>
+      <span class="metric__label">Volumen kg</span>
+    </div>
+  </div>
+
+  <span class="caption">Peso por serie · el número son las repeticiones</span>
+
+  <svg class="chart" [attr.viewBox]="'0 0 ' + width + ' 172'" role="img"
+    [attr.aria-label]="'Peso por serie en ' + sessions() + ' sesiones'">
+    <line [attr.x1]="left" [attr.y1]="bottom" [attr.x2]="right" [attr.y2]="bottom"
+      stroke="#c9d6ff" stroke-width="1.5" />
+    @for (line of gridLines(); track line.kg) {
+      <line [attr.x1]="left" [attr.y1]="line.y" [attr.x2]="right" [attr.y2]="line.y"
+        stroke="#e2e9f7" stroke-width="1" stroke-dasharray="3 4" />
+      <text [attr.x]="left - 6" [attr.y]="line.y + 3" text-anchor="end" font-size="9"
+        font-weight="700" fill="#5d6c8c">{{ line.kg }}</text>
+    }
+    @for (group of chart(); track group.label) {
+      @for (bar of group.bars; track $index) {
+        <path [attr.d]="bar.path" [attr.fill]="bar.best ? '#f0802b' : blues[$index]" />
+        <circle [attr.cx]="bar.badgeX" [attr.cy]="bar.badgeY" r="7.5" fill="#2b2b2b"
+          stroke="#fff" stroke-width="1.2" />
+        <text [attr.x]="bar.badgeX" [attr.y]="bar.badgeY + 3" text-anchor="middle" font-size="8.5"
+          font-weight="800" fill="#fff">{{ bar.reps }}</text>
+      }
+      <text [attr.x]="group.center" [attr.y]="bottom + 16" text-anchor="middle" font-size="10"
+        font-weight="800" fill="#5d6c8c">{{ group.label }}</text>
+    }
+  </svg>
+
+  <ul class="history">
+    @for (row of rows(); track row.date) {
+      <li class="row">
+        <span class="row__date">{{ row.date }}</span>
+        <span class="row__set">{{ row.set }}</span>
+        <span class="row__rm">1 RM {{ format(row.rm) }}</span>
+        @if (row.delta > 0) {
+          <span class="row__delta">+{{ format(row.delta) }}</span>
+        }
+      </li>
+    }
+  </ul>
+
+  <footer class="note">
+    1 RM = peso máximo estimado para una sola repetición (fórmula de Epley: peso × (1 +
+    repeticiones / 30)).
+  </footer>
+</section>

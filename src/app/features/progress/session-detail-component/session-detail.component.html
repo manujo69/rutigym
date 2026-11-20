@@ -1,0 +1,69 @@
+<section class="summary">
+  <div>
+    <span class="summary__value">{{ format(volume()) }}</span>
+    <span class="summary__label">Volumen kg</span>
+  </div>
+  <div>
+    <span class="summary__value">{{ series() }}</span>
+    <span class="summary__label">Series</span>
+  </div>
+  <div>
+    <span class="summary__value">{{ recordsCount() }}</span>
+    <span class="summary__label">{{ recordsCount() === 1 ? 'Récord' : 'Récords' }}</span>
+  </div>
+</section>
+
+@for (exercise of exercises(); track exercise.id) {
+  <article class="exercise">
+    <header class="exercise__head">
+      <div class="exercise__titles">
+        <span class="eyebrow">{{ exercise.group }}</span>
+        <h2 class="exercise__name">{{ exercise.name }}</h2>
+      </div>
+      @if (exercise.comparable) {
+        <button
+          type="button"
+          class="stats"
+          (click)="openStats(exercise.id)"
+          [attr.aria-label]="'Ver estadísticas de ' + exercise.name"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="13" width="4" height="8" rx="1.2" fill="#0c1a4c" />
+            <rect x="10" y="9" width="4" height="12" rx="1.2" fill="#0c1a4c" />
+            <rect x="17" y="4" width="4" height="17" rx="1.2" fill="#3c6bf5" />
+          </svg>
+        </button>
+      }
+    </header>
+
+    <ul class="sets">
+      @for (set of exercise.sets; track set.index) {
+        <li class="set" [class.set--pending]="!set.done">
+          <span class="set__index">{{ set.index }}</span>
+          <span class="set__value">
+            @if (set.bodyweight) {
+              {{ set.reps }} reps
+            } @else {
+              {{ set.kg }} kg × {{ set.reps }}
+            }
+          </span>
+          @if (set.done) {
+            <span class="set__rm">1 RM = {{ set.rm }} kg</span>
+          }
+          @if (set.best) {
+            <span class="set__best">Mejor</span>
+          }
+        </li>
+      }
+    </ul>
+  </article>
+}
+
+<footer class="note">
+  1 RM = peso máximo estimado para una sola repetición (fórmula de Epley: peso × (1 +
+  repeticiones / 30)).
+</footer>
+
+@if (openExercise(); as exerciseId) {
+  <app-exercise-stats [exerciseId]="exerciseId" (closed)="closeStats()" />
+}

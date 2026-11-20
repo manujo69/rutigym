@@ -5,6 +5,26 @@
   min-width: 0;
 }
 
+.stats {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+}
+
+.stats svg {
+  width: 20px;
+  height: 20px;
+}
+
 .topbar__title {
   overflow: hidden;
   text-overflow: ellipsis;

@@ -9,6 +9,16 @@
       <span class="eyebrow">{{ exercise()?.group ?? 'Ejercicio' }}</span>
       <h1 class="topbar__title">{{ exercise()?.name ?? 'Ejercicio' }}</h1>
     </div>
+    @if (canCompare()) {
+      <button type="button" class="stats" (click)="statsOpen.set(true)"
+        [attr.aria-label]="'Ver estadísticas de ' + (exercise()?.name ?? 'este ejercicio')">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="13" width="4" height="8" rx="1.2" fill="#0c1a4c" />
+          <rect x="10" y="9" width="4" height="12" rx="1.2" fill="#0c1a4c" />
+          <rect x="17" y="4" width="4" height="17" rx="1.2" fill="#3c6bf5" />
+        </svg>
+      </button>
+    }
   </header>
 
   @if (!dayKey() || !exercise() || !planned()) {
@@ -122,3 +132,7 @@
     </div>
   }
 </section>
+
+@if (statsOpen()) {
+  <app-exercise-stats [exerciseId]="exerciseId()" (closed)="statsOpen.set(false)" />
+}
