@@ -35,6 +35,33 @@ LABELS = {
 CARDS: dict[str, list[tuple[str, str, list[str]]]] = {
     "Hecho": [
         (
+            "Diagrama muscular con regiones nombradas",
+            "SVG de frente y dorso con 58 regiones etiquetadas; el componente elige la "
+            "vista por el músculo principal y encuadra el óvalo sobre lo trabajado.\n\n"
+            "ab56df3, d6e9342",
+            ["feature"],
+        ),
+        (
+            "Estadísticas por ejercicio en modal",
+            "Volumen, 1 RM con Epley, récords solo si hay un registro previo, gráfico de "
+            "barras por serie e historial. Se abre desde Progreso y desde el registro.\n\n"
+            "202dfb8",
+            ["feature"],
+        ),
+        (
+            "Progreso fusionado con selector de semana",
+            "La tira semanal pasa a selector y el detalle vive debajo; la lista de sesiones "
+            "y su ruta desaparecen. Un calendario propio permite elegir otra semana, con los "
+            "días anteriores al primer entrenamiento deshabilitados.\n\nada8511",
+            ["feature"],
+        ),
+        (
+            "Los registros de la semana sobreviven al terminar el día",
+            "Terminar día guarda la sesión sin borrar las series; se cierran al cambiar de "
+            "semana, registrando antes los días pendientes.\n\nbaa07ab",
+            ["feature"],
+        ),
+        (
             "Versión 0.1.0",
             "package.json y package-lock.json en 0.1.0; Android con versionCode 2 y "
             "versionName 0.1.0. Deja atrás la etapa MVP.\n\n74fa133",
@@ -98,9 +125,9 @@ CARDS: dict[str, list[tuple[str, str, list[str]]]] = {
             ["feature"],
         ),
         (
-            "Catálogo de 35 ejercicios en 4 grupos",
-            "CORE, PIERNAS, BRAZOS y ESPALDA con taxonomía documentada.\n\n"
-            "4f0377c, 569d3c0, 311e4d3, 6c00c8a",
+            "Catálogo de 87 ejercicios en 6 grupos",
+            "PECHO y HOMBRO salen de CORE y BRAZOS, y se suman 53 ejercicios con su "
+            "imagen y sus músculos.\n\n4f0377c, 569d3c0, 311e4d3, 6c00c8a, 30ebed9, fc052a6",
             ["feature"],
         ),
         (
@@ -112,9 +139,9 @@ CARDS: dict[str, list[tuple[str, str, list[str]]]] = {
     ],
     "En curso": [
         (
-            "Instalar el APK 0.1.0 en el teléfono",
-            "El APK se compila, pero el teléfono está desconectado (adb: no devices found). "
-            "Falta instalarlo y probar el flujo completo en el gimnasio.",
+            "Instalar el APK con Progreso y el catálogo nuevo",
+            "La APK instalada tiene el catálogo ampliado; falta compilar e instalar la que "
+            "incluye Progreso con estadísticas y el selector de semana.",
             ["release"],
         ),
     ],
@@ -234,7 +261,37 @@ def sync_labels(board_id: str) -> dict[str, str]:
     return label_ids
 
 
+RENAMES = {
+    "Catálogo de 35 ejercicios en 4 grupos": "Catálogo de 87 ejercicios en 6 grupos",
+    "Instalar el APK 0.1.0 en el teléfono": "APK instalada en el teléfono",
+}
+MOVES = {
+    "APK instalada en el teléfono": "Hecho",
+}
+
+
+def normalize(list_ids: dict[str, str]) -> None:
+    cards: dict[str, dict] = {}
+    for name in LIST_ORDER:
+        for card in call("GET", f"/lists/{list_ids[name]}/cards", fields="name,idList"):
+            cards[card["name"]] = card
+
+    for old, new in RENAMES.items():
+        card = cards.get(old)
+        if card:
+            call("PUT", f"/cards/{card['id']}", name=new)
+            cards[new] = cards.pop(old)
+            print(f"renombrada: {old} → {new}")
+
+    for name, target in MOVES.items():
+        card = cards.get(name)
+        if card and card["idList"] != list_ids[target]:
+            call("PUT", f"/cards/{card['id']}", idList=list_ids[target])
+            print(f"movida: {name} → {target}")
+
+
 def sync_cards(list_ids: dict[str, str], label_ids: dict[str, str]) -> None:
+    normalize(list_ids)
     existing: dict[str, dict] = {}
     for name in LIST_ORDER:
         for card in call("GET", f"/lists/{list_ids[name]}/cards", fields="name,desc,idLabels"):
