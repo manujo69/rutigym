@@ -9,20 +9,38 @@
   </header>
 
   <div class="progress__head">
-    <h2 class="section-title">Tu semana</h2>
-    <p class="muted">
-      {{ weekRange() }} · {{ weekDone() }} de {{ weekPlanned() }} sesiones completadas
-    </p>
+    <div class="progress__title-row">
+      <h2 class="section-title">Tu semana</h2>
+      <button type="button" class="week-picker" (click)="calendarOpen.set(true)"
+        aria-label="Elegir otra semana">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="5" width="18" height="16" rx="3" />
+          <path d="M3 10h18M8 3v4M16 3v4" />
+        </svg>
+      </button>
+    </div>
+    <div class="progress__range-row">
+      <p class="muted progress__range">{{ weekRange() }}</p>
+      @if (!isCurrentWeek()) {
+        <button type="button" class="today-chip" (click)="goToday()">Volver a hoy</button>
+      }
+    </div>
   </div>
 
   <div class="week">
     @for (day of week(); track day.day) {
-      <div
+      <button
+        type="button"
         class="week__tile"
         [class.week__tile--done]="day.state === 'done'"
         [class.week__tile--rest]="day.state === 'rest'"
+        [class.week__tile--selected]="isSelected(day)"
+        [disabled]="day.state !== 'done'"
+        [attr.aria-pressed]="isSelected(day)"
+        (click)="select(day)"
       >
-    <span class="week__letter">{{ day.letter }}</span>
+        <span class="week__letter">{{ day.letter }}</span>
         <span class="week__label">{{ day.label }}</span>
 
         @switch (day.state) {
@@ -44,7 +62,7 @@
             <span class="week__icon week__icon--rest" aria-hidden="true">–</span>
           }
         }
-      </div>
+      </button>
     }
   </div>
 
@@ -58,47 +76,33 @@
     </div>
   }
 
-  <div class="progress__list-head">
-    <span class="eyebrow">Sesiones terminadas</span>
-    <span class="progress__count">{{ sessions().length }}</span>
-  </div>
-
-  @if (sessions().length === 0) {
-    <div class="empty-state">
-      <p class="empty-state__title">Todavía sin histórico</p>
-      <p class="muted">Cuando termines un día de entrenamiento lo verás aquí.</p>
-      <a class="btn btn--primary btn--sm" routerLink="/entrenar">Ir a entrenar</a>
+  @if (detail(); as session) {
+    <div class="detail__head">
+      <p class="section-title">{{ detailTitle() }}</p>
+      @if (detailRoutine()) {
+        <span class="detail__routine">{{ detailRoutine() }}</span>
+      }
     </div>
+    <app-session-detail [sessionId]="session.id" />
   } @else {
-    @for (card of sessions(); track card.id) {
-      <article class="session">
-        <header class="session__head">
-          <div class="session__titles">
-            <p class="session__title">{{ card.title }}</p>
-            <p class="session__meta">
-              {{ card.rows.length }} ejercicios · {{ card.series }} series
-              @if (card.isToday) {
-                · hoy
-              }
-            </p>
-          </div>
-          @if (card.demo) {
-            <span class="badge">Ejemplo</span>
-          }
-        </header>
-
-        <ul class="session__rows">
-          @for (row of card.rows; track $index) {
-            <li class="session__row">
-              <div class="session__row-head">
-                <span class="session__name">{{ row.name }}</span>
-                <span class="session__group">{{ row.group }}</span>
-              </div>
-              <span class="session__sets">{{ row.sets }}</span>
-            </li>
-          }
-        </ul>
-      </article>
-    }
+    <div class="empty-state">
+      <p class="empty-state__title">
+        {{ isCurrentWeek() ? 'Aún no hay sesiones esta semana' : 'No hay sesiones en esta semana' }}
+      </p>
+      <p class="muted">Termina un día de entrenamiento y su detalle aparecerá aquí.</p>
+      @if (isCurrentWeek()) {
+        <a class="btn btn--primary btn--sm" routerLink="/entrenar">Ir a entrenar</a>
+      }
+    </div>
   }
 </section>
+
+@if (calendarOpen()) {
+  <app-week-calendar
+    [selected]="selectedIso()"
+    [firstLogged]="firstLogged()"
+    [logged]="loggedDates()"
+    (picked)="pickWeek($event)"
+    (closed)="calendarOpen.set(false)"
+  />
+}

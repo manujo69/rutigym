@@ -1,0 +1,51 @@
+<div class="veil" (click)="close()"></div>
+
+<section class="sheet" role="dialog" aria-modal="true" aria-label="Elegir una semana">
+  <span class="handle"></span>
+
+  <header class="sheet__head">
+    <h2 class="sheet__title">Elegir semana</h2>
+    <button type="button" class="close" (click)="close()" aria-label="Cerrar calendario">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <path d="M18 6L6 18M6 6l12 12" />
+      </svg>
+    </button>
+  </header>
+
+  <div class="month">
+    <button type="button" class="month__nav" (click)="back()" [disabled]="!canGoBack()" aria-label="Mes anterior">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </button>
+    <span class="month__title">{{ title() }}</span>
+    <button type="button" class="month__nav" (click)="forward()" aria-label="Mes siguiente">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 18l6-6-6-6" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="grid">
+    @for (label of weekdays; track label) {
+      <span class="grid__weekday">{{ label }}</span>
+    }
+    @for (day of days(); track day.iso) {
+      <button
+        type="button"
+        class="day"
+        [class.day--outside]="day.outside"
+        [class.day--selected]="day.selected"
+        [class.day--today]="day.today"
+        [class.day--logged]="day.logged"
+        [disabled]="day.disabled"
+        [attr.aria-pressed]="day.selected"
+        (click)="pick(day)"
+      >
+        {{ day.day }}
+      </button>
+    }
+  </div>
+
+  <p class="hint">Elige cualquier día: se abrirá su semana completa.</p>
+</section>

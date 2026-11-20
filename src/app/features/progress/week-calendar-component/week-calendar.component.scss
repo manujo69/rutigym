@@ -1,0 +1,162 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: block;
+}
+
+.veil {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 12, 36, 0.48);
+}
+
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 90%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px 16px 20px;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  background: var(--surface);
+  box-shadow: 0 -22px 40px -28px rgba(5, 12, 36, 0.6);
+}
+
+.handle {
+  width: 42px;
+  height: 4px;
+  margin: 0 auto 2px;
+  border-radius: 999px;
+  background: var(--blue-200);
+}
+
+.sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sheet__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.close {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--blue-75);
+  color: var(--ink-soft);
+}
+
+.close svg {
+  width: 14px;
+  height: 14px;
+}
+
+.month {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.month__title {
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.month__nav {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.month__nav svg {
+  width: 16px;
+  height: 16px;
+}
+
+.month__nav:disabled {
+  opacity: 0.35;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.grid__weekday {
+  padding-bottom: 2px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.day {
+  position: relative;
+  aspect-ratio: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.day--outside {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.day--logged {
+  background: var(--blue-75);
+}
+
+.day--today {
+  border-color: var(--blue-200);
+}
+
+.day--selected {
+  background: var(--blue-500);
+  color: #fff;
+}
+
+.day:disabled {
+  color: var(--muted);
+  opacity: 0.3;
+  background: transparent;
+  cursor: default;
+}
+
+.hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted);
+}

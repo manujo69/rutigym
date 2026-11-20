@@ -4,6 +4,60 @@
   gap: 4px;
 }
 
+.progress__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.progress__title-row .section-title {
+  margin: 0;
+}
+
+.week-picker {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.week-picker svg {
+  width: 18px;
+  height: 18px;
+}
+
+.progress__range-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.progress__range {
+  margin: 0;
+  min-width: 0;
+}
+
+.today-chip {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--blue-75);
+  color: var(--blue-600);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .week {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -11,6 +65,10 @@
 }
 
 .week__tile {
+  border: 1px solid var(--line);
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -21,6 +79,14 @@
   border-radius: var(--radius-sm);
   background: var(--surface);
   text-align: center;
+}
+
+.week__tile--selected {
+  box-shadow: 0 0 0 3px rgba(60, 107, 245, 0.35);
+}
+
+.week__tile:disabled {
+  cursor: default;
 }
 
 .week__tile--done {
@@ -201,4 +267,22 @@
   letter-spacing: 0.01em;
   color: var(--blue-600);
   font-variant-numeric: tabular-nums;
+}
+
+.detail__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.detail__head .section-title {
+  margin: 0;
+}
+
+.detail__routine {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(11, 18, 40, 0.75);
 }
